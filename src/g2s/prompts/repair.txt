@@ -1,0 +1,18 @@
+The query below is wrong. Fix it.
+
+{schema}
+{candidates}
+Question: {question}
+
+Query that failed:
+{query}
+
+What is wrong with it:
+{errors}
+
+Rules:
+- Output only the corrected query, nothing else.
+- Keep the prefix declarations.
+- Use only classes, properties and IRIs that exist. Do not invent new ones.
+
+Corrected query:
