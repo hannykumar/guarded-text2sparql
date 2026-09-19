@@ -145,16 +145,23 @@ def g4_vocabulary(query: str, store: Store) -> list[str]:
     # matched lowercased: the model's mistakes are usually casing or word order
     # (suppliedBy for hasSupplier), which an exact-case comparison misses entirely
     by_lower = {short(term).lower(): short(term) for term in known}
+    # a name starting lowercase is a property; suggesting classes for it wastes the repair
+    properties = sorted(n for n in by_lower.values() if n.split(":")[-1][:1].islower())
     errors = []
     for iri in sorted(i for i in iris_in(query) if i.startswith(VOCAB)):
-        if iri not in known:
-            close = get_close_matches(short(iri).lower(), list(by_lower), n=3, cutoff=0.3)
-            hint = (
-                f" Did you mean {', '.join(by_lower[m] for m in close)}?"
-                if close
-                else " Use a class or property from the schema above."
+        if iri in known:
+            continue
+        name = short(iri)
+        close = get_close_matches(name.lower(), list(by_lower), n=3, cutoff=0.3)
+        hint = f" Did you mean {', '.join(by_lower[m] for m in close)}?" if close else ""
+        if name.split(":")[-1][:1].islower() and properties:
+            # the model often invents a property because the graph models the relation the
+            # other way round, so the fix is the full list, not the closest-looking name
+            hint += (
+                f" The only properties that exist are: {', '.join(properties)}."
+                " If none fits, the relation may be modelled in the opposite direction."
             )
-            errors.append(f"G4 vocabulary: {short(iri)} does not exist.{hint}")
+        errors.append(f"G4 vocabulary: {name} does not exist.{hint}")
     return errors
 
 

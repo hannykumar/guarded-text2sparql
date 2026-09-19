@@ -113,7 +113,7 @@ def answer(question: str) -> str:
             trace.record(question=question, query="", blocked=str(blocked), attempts=attempts,
                          seconds=round(time.perf_counter() - started, 2))
             return "SELECT ?result WHERE { ?result ?p ?o } LIMIT 0"
-        attempts.append({"attempt": attempt, "errors": errors, "executed": executed})
+        attempts.append({"attempt": attempt, "errors": errors, "executed": executed, "query": query})
         if not errors:
             break
         if executed:

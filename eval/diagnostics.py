@@ -32,7 +32,7 @@ def summarise(traces: list[dict]) -> dict:
         return {}
     blocked = [t for t in traces if t.get("blocked")]
     first_errors: Counter[str] = Counter()
-    repaired_ok = repaired = 0
+    repaired_ok = repaired = first_problem_fixed = 0
     clean_first_try = 0
 
     for trace in traces:
@@ -44,10 +44,16 @@ def summarise(traces: list[dict]) -> dict:
             clean_first_try += 1
         else:
             repaired += 1
-            for error in first:
-                first_errors[error.split(":")[0]] += 1
-            if not (attempts[-1].get("errors") or []):
+            codes = {error.split(":")[0] for error in first}
+            for code in codes:
+                first_errors[code] += 1
+            final = attempts[-1].get("errors") or []
+            if not final:
                 repaired_ok += 1
+            # a repair that fixes the vocabulary error but then returns nothing trips G7
+            # instead: the reported problem was still solved, and that is worth counting
+            if not (codes & {error.split(":")[0] for error in final}):
+                first_problem_fixed += 1
 
     seconds = [t["seconds"] for t in traces if "seconds" in t]
     final_clean = sum(1 for t in traces if t.get("attempts") and not (t["attempts"][-1].get("errors") or []))
@@ -58,6 +64,8 @@ def summarise(traces: list[dict]) -> dict:
         "needed_repair": repaired,
         "repair_succeeded": repaired_ok,
         "repair_success_rate": round(repaired_ok / repaired, 3) if repaired else None,
+        "first_problem_fixed": first_problem_fixed,
+        "first_problem_fixed_rate": round(first_problem_fixed / repaired, 3) if repaired else None,
         "passing_all_guardrails_at_the_end": final_clean,
         "g1_blocks": len(blocked),
         "first_failure_by_guardrail": dict(first_errors.most_common()),
