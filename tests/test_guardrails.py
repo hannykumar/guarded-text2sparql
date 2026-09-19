@@ -130,3 +130,26 @@ def test_check_passes_a_good_query_and_keeps_the_prefix_fix():
 def test_check_stops_at_syntax_before_touching_the_store():
     _, errors, executed = g.check(PREFIXES + "SELECT ?x WHERE { ?x a", FakeStore())
     assert not executed and errors[0].startswith("G2 syntax")
+
+
+# --- regressions found by the first real run --------------------------------------
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        PREFIXES + "SELECT ?result WHERE { ?result a pv:Service }",
+        PREFIXES + "SELECT ?service WHERE { ?service a pv:Service ; pv:name ?n }",
+        PREFIXES + 'SELECT ?x WHERE { ?x pv:name "DELETE ME" }',
+        PREFIXES + "# INSERT is only mentioned in this comment\nSELECT ?x WHERE { ?x a pv:Employee }",
+    ],
+)
+def test_g1_does_not_block_ordinary_names_that_contain_a_keyword(query):
+    """pv:Service is a class in this graph. G1 blocked every question about services."""
+    g.g1_read_only(query)
+
+
+def test_g1_still_blocks_the_real_service_keyword():
+    with pytest.raises(g.Blocked):
+        g.g1_read_only(PREFIXES + "SELECT * WHERE { SERVICE <http://elsewhere/sparql> { ?s ?p ?o } }")
+    with pytest.raises(g.Blocked):
+        g.g1_read_only(PREFIXES + "select * where { service <http://elsewhere/sparql> { ?s ?p ?o } }")
