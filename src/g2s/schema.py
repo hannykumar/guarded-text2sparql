@@ -5,7 +5,7 @@ LLM only ever sees vocabulary that exists.
 """
 from __future__ import annotations
 
-from g2s.sparql import ENDPOINT, select
+from g2s.sparql import ENDPOINT, STARTUP_TIMEOUT, select
 
 VOCAB = "http://ld.company.org/prod-vocab/"
 
@@ -52,7 +52,7 @@ def build(endpoint: str = ENDPOINT) -> str:
         "",
         "## Classes (with instance counts)",
     ]
-    for row in select(CLASSES, endpoint):
+    for row in select(CLASSES, endpoint, STARTUP_TIMEOUT):
         parts = [f"- {short(row['cls'])}"]
         if row.get("label"):
             parts.append(f'"{row["label"]}"')
@@ -65,7 +65,7 @@ def build(endpoint: str = ENDPOINT) -> str:
         lines.append(" ".join(parts))
 
     lines += ["", "## Properties (domain -> range, example value)"]
-    for row in select(PROPERTIES, endpoint):
+    for row in select(PROPERTIES, endpoint, STARTUP_TIMEOUT):
         arrow = f"{short(row.get('domain', '?'))} -> {short(row.get('range', '?'))}"
         line = f"- {short(row['prop'])} ({arrow})"
         if row.get("label"):

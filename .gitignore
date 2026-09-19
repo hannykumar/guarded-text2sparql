@@ -4,8 +4,12 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .env
-# reference answers; regenerate with `make truth-official`
+# reference answers (any run's ground truth); regenerate with `make truth-official` or eval/run_official.sh
 results/true.json
+results/**/true.json
+*.db
+data/ck25/questions-*.yml
 responses.db
 retries.log
 *.egg-info/
+results/traces.jsonl

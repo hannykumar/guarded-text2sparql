@@ -1,0 +1,30 @@
+Examples (a different, unrelated toy graph, for form only). Every query repeats its prefixes:
+
+Question: Which shelf is the book "Blue Horizon" on?
+Query:
+PREFIX toy: <http://example.org/library-vocab/>
+SELECT DISTINCT ?result WHERE {
+  <http://example.org/library/book-blue-horizon> toy:shelvedAt ?result .
+  ?result a toy:Shelf .
+}
+
+Question: How many books did Ada Lovelace write?
+Query:
+PREFIX toy: <http://example.org/library-vocab/>
+SELECT (COUNT(DISTINCT ?book) AS ?result) WHERE {
+  ?book a toy:Book ; toy:writtenBy <http://example.org/library/author-ada-lovelace> .
+}
+
+Question: Is the library open on Sunday?
+Query:
+PREFIX toy: <http://example.org/library-vocab/>
+ASK {
+  <http://example.org/library/main> toy:openOn "Sunday" .
+}
+
+Question: Which three authors have the most books, most first?
+Query:
+PREFIX toy: <http://example.org/library-vocab/>
+SELECT ?result (COUNT(?book) AS ?books) WHERE {
+  ?book a toy:Book ; toy:writtenBy ?result .
+} GROUP BY ?result ORDER BY DESC(?books) LIMIT 3

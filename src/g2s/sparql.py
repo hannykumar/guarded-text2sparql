@@ -8,7 +8,8 @@ import urllib.parse
 import urllib.request
 
 ENDPOINT = os.environ.get("SPARQL_ENDPOINT", "http://localhost:3030/ck/query")
-TIMEOUT = 10
+TIMEOUT = 10  # guardrail G6: a generated query gets 10 s
+STARTUP_TIMEOUT = 60  # schema card and label index are built once and may be slower
 
 
 class QueryError(RuntimeError):

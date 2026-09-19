@@ -1,0 +1,14 @@
+List the named things in the question that must be looked up in the knowledge graph:
+people, departments, products, suppliers, categories.
+
+Output only JSON: {"mentions": ["..."]}
+Use the wording of the question. Do not add anything that is not named in it.
+No mentions means an empty list.
+
+Question: Who is the manager of Heinrich Hoch?
+{"mentions": ["Heinrich Hoch"]}
+
+Question: How many products are there?
+{"mentions": []}
+
+Question: {question}
