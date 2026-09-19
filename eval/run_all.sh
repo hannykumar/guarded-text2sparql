@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
-# The whole measurement, unattended. Start it when you are not using the machine.
+# The measurement, unattended. Start it when you are not using the machine.
 #
-#   eval/run_all.sh            # full: A0-A3 on dev and test, 3 runs each, plus the model comparison
-#   eval/run_all.sh smoke      # a few minutes: one tiny-model run on dev, to prove the plumbing
+#   eval/run_all.sh rehearse   # seconds, no model: proves the harness works
+#   eval/run_all.sh smoke      # minutes: one real run with the small model
+#   eval/run_all.sh dev        # A0-A3 on the 15 dev questions, 3 runs each
+#   eval/run_all.sh test       # A0-A3 on the 35 held-back questions + the model comparison
+#   eval/run_all.sh ck26       # the paraphrase-robustness run
+#
+# Run `dev` first, look at the results, freeze the design, and only then run `test`.
+# The test questions are meant to be seen once.
 #
 # Resumable: a run whose metrics.json already exists is skipped, so Ctrl-C and restart
 # continues where it stopped. One model call at a time; never two API processes at once.
 set -euo pipefail
-MODE=${1:-full}
+# No default: a bare `eval/run_all.sh` must never start loading a model by accident.
+MODE=${1:-}
 MAIN_MODEL=${LLM_MODEL:-qwen2.5-coder:7b}
 COMPARISON_MODEL=${COMPARISON_MODEL:-qwen2.5-coder:1.5b}
 LOGS=results/logs
@@ -31,27 +38,41 @@ run_one() {  # config split run model
     || { echo "FAILED $tag - see $LOGS/${config}-${split}-run${run}.log" >&2; return 1; }
 }
 
-if [ "$MODE" = smoke ]; then
-  ollama pull "$COMPARISON_MODEL"
-  run_one A3 dev 99 "$COMPARISON_MODEL"
-  uv run --group eval python eval/diagnostics.py
-  echo "smoke done. If this looks right, run: eval/run_all.sh"
-  exit 0
-fi
-
-# 1. the ablation, three runs each: local inference is not bit-identical even at temperature 0
-for run in 1 2 3; do
-  for config in A0 A1 A2 A3; do
-    for split in dev test; do
-      run_one "$config" "$split" "$run" "$MAIN_MODEL" || true   # keep going; failures are logged
+case "$MODE" in
+  rehearse)
+    exec eval/rehearse.sh
+    ;;
+  smoke)
+    ollama pull "$COMPARISON_MODEL"
+    run_one A3 dev 99 "$COMPARISON_MODEL"
+    uv run --group eval python eval/diagnostics.py
+    echo "smoke done. If this looks right: eval/run_all.sh dev"
+    exit 0
+    ;;
+  dev|test)
+    # three runs each: local inference is not bit-identical even at temperature 0
+    for run in 1 2 3; do
+      for config in A0 A1 A2 A3; do
+        run_one "$config" "$MODE" "$run" "$MAIN_MODEL" || true  # keep going; failures are logged
+      done
     done
-  done
-done
-
-# 2. model comparison on the full system only
-for run in 1 2 3; do
-  LLM_MODEL="$COMPARISON_MODEL" run_one A3 test "1${run}" "$COMPARISON_MODEL" || true
-done
+    # model comparison, full system only, on the held-back questions
+    if [ "$MODE" = test ]; then
+      for run in 1 2 3; do
+        run_one A3 test "1${run}" "$COMPARISON_MODEL" || true
+      done
+    fi
+    ;;
+  ck26)
+    run_one A3 ck26 1 "$MAIN_MODEL" || true
+    ;;
+  *)
+    echo "usage: eval/run_all.sh rehearse|smoke|dev|test|ck26" >&2
+    echo "  rehearse  seconds, no model      smoke  minutes, small model" >&2
+    echo "  dev       the 15 dev questions   test   the 35 held-back questions" >&2
+    exit 1
+    ;;
+esac
 
 uv run --group eval python eval/diagnostics.py
 uv run --group eval python eval/report.py
