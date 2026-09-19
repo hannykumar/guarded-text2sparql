@@ -12,7 +12,9 @@
     "http://ld.company.org/prod-instances/hw-S113-2439377": 1
   },
   "ck25:26-en": {},
-  "ck25:28-en": {},
+  "ck25:28-en": {
+    "true": 0
+  },
   "ck25:29-en": {
     "Curtis, Perkins and Sims": 1,
     "Hernandez, Mayer and Jones": 1,

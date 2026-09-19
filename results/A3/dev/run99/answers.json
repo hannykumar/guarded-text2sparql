@@ -2,7 +2,7 @@
   {
     "dataset": "https://text2sparql.aksw.org/2025/corporate/",
     "question": "Who is our Sensor expert?",
-    "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?result WHERE {\n  ?result a pv:Hardware ;\n           pv:name \"Sensor expert\" .\n}",
+    "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?result WHERE {\n  ?result a pv:Hardware ;\n           pv:name \"Sensor expert\" ;\n           pv:areaOfExpertise <http://ld.company.org/prod-instances/hw-R946-7112528> .\n}",
     "endpoint": "http://localhost:8000",
     "qname": "ck25:6-en",
     "uri": "https://text2sparql.aksw.org/2025/corporate/6-en"
@@ -26,7 +26,7 @@
   {
     "dataset": "https://text2sparql.aksw.org/2025/corporate/",
     "question": "Who is responsible for the most expensive service we offer?",
-    "query": "SELECT ?result WHERE { ?result ?p ?o } LIMIT 0",
+    "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?result WHERE {\n  ?service a pv:Service ;\n           pv:price ?price ;\n           pv:eligibleFor ?product .\n  ?price pv:amount ?amount ;\n         pv:currency ?currency .\n  ?product pv:hasProductManager ?manager .\n  FILTER(?amount = (SELECT MAX(?amount) WHERE {\n    ?service2 a pv:Service ;\n             pv:price ?price2 ;\n             pv:eligibleFor ?product2 .\n    ?price2 pv:amount ?amount2 ;\n             pv:currency ?currency2 .\n    FILTER(?amount2 = ?amount)\n  }))\n  BIND(?manager AS ?result)\n}",
     "endpoint": "http://localhost:8000",
     "qname": "ck25:20-en",
     "uri": "https://text2sparql.aksw.org/2025/corporate/20-en"
@@ -50,7 +50,7 @@
   {
     "dataset": "https://text2sparql.aksw.org/2025/corporate/",
     "question": "Do we have any service that does apply to a BOM where parts are sourced from Russia?",
-    "query": "SELECT ?result WHERE { ?result ?p ?o } LIMIT 0",
+    "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nASK {\n  ?service pv:eligibleFor ?product .\n  ?product pv:hasSupplier ?supplier .\n  ?supplier pv:country <http://ld.company.org/prod-instances/Country-Russia> .\n}",
     "endpoint": "http://localhost:8000",
     "qname": "ck25:28-en",
     "uri": "https://text2sparql.aksw.org/2025/corporate/28-en"

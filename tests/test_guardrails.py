@@ -148,6 +148,20 @@ def test_g1_does_not_block_ordinary_names_that_contain_a_keyword(query):
     g.g1_read_only(query)
 
 
+def test_g4_lists_the_real_properties_and_mentions_direction():
+    """An invented property is often a relation modelled the other way round."""
+    errors = g.g4_vocabulary(PREFIXES + "SELECT ?x WHERE { ?x pv:hasProduct ?p }", FakeStore())
+    assert len(errors) == 1
+    assert "The only properties that exist are" in errors[0]
+    assert "pv:memberOf" in errors[0] and "pv:name" in errors[0]
+    assert "opposite direction" in errors[0]
+
+
+def test_g4_does_not_list_properties_for_a_missing_class():
+    errors = g.g4_vocabulary(PREFIXES + "SELECT ?x WHERE { ?x a pv:Machine }", FakeStore())
+    assert "The only properties that exist are" not in errors[0]
+
+
 def test_g1_still_blocks_the_real_service_keyword():
     with pytest.raises(g.Blocked):
         g.g1_read_only(PREFIXES + "SELECT * WHERE { SERVICE <http://elsewhere/sparql> { ?s ?p ?o } }")

@@ -30,6 +30,17 @@ def test_counts_clean_repaired_and_failed():
     assert summary["first_failure_by_guardrail"] == {"G4 vocabulary": 1, "G2 syntax": 1}
 
 
+def test_a_repair_that_fixes_the_reported_problem_counts_even_if_a_new_one_appears():
+    """Fixing pv:worksIn and then getting an empty result is progress, not failure."""
+    summary = summarise([
+        trace([["G4 vocabulary: pv:worksIn does not exist."],
+               ["G7 plausibility: the query is valid but returns nothing."]]),
+    ])
+    assert summary["repair_succeeded"] == 0        # not perfect at the end
+    assert summary["first_problem_fixed"] == 1     # but the vocabulary error is gone
+    assert summary["first_problem_fixed_rate"] == 1.0
+
+
 def test_counts_g1_blocks_and_latency():
     summary = summarise([trace([[]], seconds=2.0), trace([], blocked="G1: DELETE is not allowed")])
     assert summary["g1_blocks"] == 1

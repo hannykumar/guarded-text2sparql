@@ -1,20 +1,21 @@
 {
   "A3": {
     "questions": 15,
-    "clean_first_try": 7,
-    "needed_repair": 8,
+    "clean_first_try": 6,
+    "needed_repair": 9,
     "repair_succeeded": 0,
     "repair_success_rate": 0.0,
-    "passing_all_guardrails_at_the_end": 7,
-    "g1_blocks": 2,
+    "first_problem_fixed": 0,
+    "first_problem_fixed_rate": 0.0,
+    "passing_all_guardrails_at_the_end": 6,
+    "g1_blocks": 0,
     "first_failure_by_guardrail": {
-      "G7 plausibility": 4,
-      "G6 execution": 2,
-      "G4 vocabulary": 2,
-      "G2 syntax": 1
+      "G7 plausibility": 6,
+      "G2 syntax": 2,
+      "G4 vocabulary": 1
     },
     "repairs_per_question_median": 2,
-    "seconds_p50": 55.2,
-    "seconds_p95": 285.7
+    "seconds_p50": 125.9,
+    "seconds_p95": 242.7
   }
 }
