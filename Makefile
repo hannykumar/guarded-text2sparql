@@ -1,4 +1,4 @@
-.PHONY: data store load truth truth-official serve rehearse smoke evaluate report test
+.PHONY: data store load truth truth-official serve rehearse smoke evaluate evaluate-test report test
 
 data:          ## download CK25 at the pinned commit
 	scripts/get_data.sh
@@ -25,8 +25,11 @@ rehearse:      ## seconds: prove the whole measurement harness with a stub LLM, 
 smoke:         ## a few minutes: prove the measurement plumbing with a tiny model
 	eval/run_all.sh smoke
 
-evaluate:      ## the whole measurement, unattended and resumable (hours; the machine will be slow)
-	eval/run_all.sh
+evaluate:      ## the dev measurement, unattended and resumable (hours; the machine will be slow)
+	eval/run_all.sh dev
+
+evaluate-test: ## the held-back 35 questions. Only after the design is frozen
+	eval/run_all.sh test
 
 report:        ## rebuild results/RESULTS.md and diagnostics from whatever has been measured
 	uv run --group eval python eval/diagnostics.py

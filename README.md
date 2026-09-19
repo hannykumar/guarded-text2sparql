@@ -80,7 +80,9 @@ Then, to measure for real (this loads the model and will make the machine slow):
 ```bash
 ollama pull qwen2.5-coder:7b
 make smoke             # minutes: one real run with the small model
-make evaluate          # the full ablation, unattended and resumable
+make evaluate          # A0-A3 on the dev questions, 3 runs each, resumable
+# freeze the design, then:
+make evaluate-test     # the 35 held-back questions, seen once
 ```
 
 `make evaluate` skips any run it has already scored, so it can be stopped and restarted.

@@ -13,3 +13,5 @@ responses.db
 retries.log
 *.egg-info/
 results/traces.jsonl
+results/*.jsonl
+results/logs/
