@@ -230,7 +230,7 @@ wheels = [
 [[package]]
 name = "guarded-text2sparql"
 version = "0.0.1"
-source = { virtual = "." }
+source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [

@@ -8,3 +8,4 @@ __pycache__/
 results/true.json
 responses.db
 retries.log
+*.egg-info/
