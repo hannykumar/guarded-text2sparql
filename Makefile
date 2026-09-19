@@ -1,4 +1,4 @@
-.PHONY: data store load truth truth-official serve smoke evaluate report test
+.PHONY: data store load truth truth-official serve rehearse smoke evaluate report test
 
 data:          ## download CK25 at the pinned commit
 	scripts/get_data.sh
@@ -18,6 +18,9 @@ truth-official: ## official ground truth (holds the answers, so it is not commit
 
 serve:         ## run the API on :8000
 	PYTHONPATH=src uv run uvicorn g2s.api:app --port 8000
+
+rehearse:      ## seconds: prove the whole measurement harness with a stub LLM, no model
+	eval/rehearse.sh
 
 smoke:         ## a few minutes: prove the measurement plumbing with a tiny model
 	eval/run_all.sh smoke
