@@ -3,8 +3,10 @@
 #
 #   eval/run_all.sh rehearse   # seconds, no model: proves the harness works
 #   eval/run_all.sh smoke      # minutes: one real run with the small model
-#   eval/run_all.sh dev        # A0-A3 on the 15 dev questions, 3 runs each
-#   eval/run_all.sh test       # A0-A3 on the 35 held-back questions + the model comparison
+#   eval/run_all.sh dev        # A0-A3 on the 15 dev questions
+#   eval/run_all.sh test       # A0-A3 on the 35 held-back questions
+#
+# RUNS=n repeats each config n times (default 3).
 #   eval/run_all.sh ck26       # the paraphrase-robustness run
 #
 # Run `dev` first, look at the results, freeze the design, and only then run `test`.
@@ -16,7 +18,7 @@ set -euo pipefail
 # No default: a bare `eval/run_all.sh` must never start loading a model by accident.
 MODE=${1:-}
 MAIN_MODEL=${LLM_MODEL:-qwen2.5-coder:7b}
-COMPARISON_MODEL=${COMPARISON_MODEL:-qwen2.5-coder:1.5b}
+RUNS=${RUNS:-3}  # repeats per config: local inference is not bit-identical even at temperature 0
 LOGS=results/logs
 mkdir -p "$LOGS"
 
@@ -43,25 +45,17 @@ case "$MODE" in
     exec eval/rehearse.sh
     ;;
   smoke)
-    ollama pull "$COMPARISON_MODEL"
-    run_one A3 dev 99 "$COMPARISON_MODEL"
+    run_one A3 dev 99 "$MAIN_MODEL"
     uv run --group eval python eval/diagnostics.py
     echo "smoke done. If this looks right: eval/run_all.sh dev"
     exit 0
     ;;
   dev|test)
-    # three runs each: local inference is not bit-identical even at temperature 0
-    for run in 1 2 3; do
+    for run in $(seq 1 "$RUNS"); do
       for config in A0 A1 A2 A3; do
         run_one "$config" "$MODE" "$run" "$MAIN_MODEL" || true  # keep going; failures are logged
       done
     done
-    # model comparison, full system only, on the held-back questions
-    if [ "$MODE" = test ]; then
-      for run in 1 2 3; do
-        run_one A3 test "1${run}" "$COMPARISON_MODEL" || true
-      done
-    fi
     ;;
   ck26)
     run_one A3 ck26 1 "$MAIN_MODEL" || true
