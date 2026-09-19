@@ -1,0 +1,20 @@
+[project]
+name = "guarded-text2sparql"
+version = "0.0.1"
+description = "Text-to-SPARQL over eccenca's CK25 knowledge graph: an LLM proposes, deterministic guardrails decide."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+# Official scorer. Needs a C compiler (pytrec-eval builds from source on macOS).
+eval = ["text2sparql-client==2.1.0", "pyyaml>=6"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 110
+extend-exclude = ["data"]
