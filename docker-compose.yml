@@ -1,6 +1,9 @@
 services:
-  oxigraph:
-    image: oxigraph/oxigraph:0.5.11
-    command: serve --location /data --bind 0.0.0.0:7878
-    ports: ["7878:7878"]
-    volumes: ["./data/oxigraph:/data"]
+  fuseki:
+    image: stain/jena-fuseki:5.1.0
+    environment:
+      ADMIN_PASSWORD: admin   # local dev store, no secrets in it
+      FUSEKI_DATASET_1: ck
+    ports: ["3030:3030"]
+    # ponytail: in-memory dataset, so re-run `make load` after a restart.
+    # Loading takes seconds; switch to TDB2 only if that ever gets annoying.

@@ -3,6 +3,7 @@
 Evaluator-only file: it reads the reference queries, so the pipeline (src/) must never import it.
 """
 import json
+import os
 import sys
 import urllib.parse
 import urllib.request
@@ -10,7 +11,7 @@ from pathlib import Path
 
 import yaml
 
-ENDPOINT = "http://localhost:7878/query"
+ENDPOINT = os.environ.get("SPARQL_ENDPOINT", "http://localhost:3030/ck/query")
 
 
 def run(query: str) -> dict:
