@@ -79,7 +79,7 @@ Then, to measure for real (this loads the model and will make the machine slow):
 
 ```bash
 ollama pull qwen2.5-coder:7b
-make smoke             # minutes: one real run with the small model
+make smoke             # minutes: one real scored run, to catch problems early
 make evaluate          # A0-A3 on the dev questions, 3 runs each, resumable
 # freeze the design, then:
 make evaluate-test     # the 35 held-back questions, seen once
@@ -109,7 +109,8 @@ bit-identical even at temperature 0.
 
 ## Limitations
 
-- A 7B model on a laptop. Model size was limited by available hardware, not by choice.
+- A 7B model on a laptop, and only that one model. Model size and the absence of a
+  larger comparison were both limited by available hardware, not by choice.
 - 50 questions is a small benchmark; one question is worth 0.02 F1 on the test split.
 - `"Ms. Brant"` matches two people in the graph. The linker returns both and the model
   chooses, because inferring gender from an honorific is not something code should do.
@@ -135,8 +136,7 @@ This repository contains no dataset; `scripts/get_data.sh` downloads it.
   [repository](https://github.com/eccenca/ck25-dataset) · **CC-BY-4.0**, pinned at
   commit `cb928b2f`. No endorsement by eccenca is implied.
 - **Scorer:** [text2sparql-client](https://github.com/AKSW/text2sparql-client) 2.1.0, Apache-2.0.
-- **Models:** `qwen2.5-coder:7b` and `qwen2.5-coder:1.5b`, both **Apache-2.0**. Which
-  model produced which number is recorded in `results/`.
+- **Model:** `qwen2.5-coder:7b`, **Apache-2.0**. Every result records the model that produced it.
 - **Store:** [Apache Jena Fuseki](https://jena.apache.org/documentation/fuseki2/) 5.1.0, Apache-2.0.
 
 Code: [Apache-2.0](LICENSE). Cite this repository with [CITATION.cff](CITATION.cff).
