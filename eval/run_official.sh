@@ -14,6 +14,10 @@ rm -f "$OUT"/{true,answers,pred,metrics}.json "$OUT/responses.db"
 
 if [ "$SPLIT" = all ]; then
   QUESTIONS=data/ck25/questions.yml
+elif [ "$SPLIT" = ck26 ]; then
+  # paraphrase-robustness check: same graph, reworded questions
+  [ -f data/ck26/questions_ck26.yml ] || scripts/get_ck26.sh
+  QUESTIONS=data/ck26/questions_ck26.yml
 else
   QUESTIONS="data/ck25/questions-$SPLIT.yml"
   uv run --group eval python eval/split.py subset "$SPLIT" "$QUESTIONS"
