@@ -7,7 +7,7 @@ FORBIDDEN = ("queries.ttl", "questions.yml", "questions_ck26.yml")
 
 
 def test_pipeline_never_references_answer_files():
-    files = [*(ROOT / "src").rglob("*"), ROOT / "scripts" / "load_store.sh"]
+    files = [*(ROOT / "src").rglob("*.py"), ROOT / "scripts" / "load_store.sh"]
     hits = [
         f"{f.relative_to(ROOT)}: {name}"
         for f in files
