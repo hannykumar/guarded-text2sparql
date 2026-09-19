@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: "guarded-text2sparql: LLM-proposed SPARQL with deterministic guardrails"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Kumar
+    given-names: Hanny
+repository-code: "https://github.com/hannykumar/guarded-text2sparql"
+license: Apache-2.0
+version: 0.1.0
+abstract: >-
+  A text-to-SPARQL prototype over eccenca's CK25 corporate knowledge graph. A local
+  language model proposes a query; deterministic guardrails (read-only, syntax,
+  prefixes, vocabulary, entity existence, execution, plausibility, bounded repair)
+  decide whether it is returned. Evaluated with the official TEXT2SPARQL challenge
+  client, with an ablation measuring what the schema card, entity linking and the
+  guardrails each contribute.
+keywords:
+  - text-to-SPARQL
+  - knowledge graphs
+  - SPARQL
+  - large language models
+  - guardrails
+references:
+  - type: data
+    title: >-
+      The CK25 Corporate Knowledge Reference Dataset for Benchmarking Text 2 SPARQL
+      Question Answering Approaches
+    authors:
+      - family-names: Tramp
+        given-names: Sebastian
+        affiliation: eccenca GmbH
+      - family-names: Pietzsch
+        given-names: René
+        affiliation: eccenca GmbH
+    year: 2025
+    doi: 10.5281/zenodo.16912605
+    license: CC-BY-4.0
+    repository-code: "https://github.com/eccenca/ck25-dataset"

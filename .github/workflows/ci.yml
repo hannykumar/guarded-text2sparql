@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      fuseki:
+        image: stain/jena-fuseki:5.1.0
+        env:
+          ADMIN_PASSWORD: admin
+          FUSEKI_DATASET_1: ck
+        ports: ["3030:3030"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --group eval
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Download CK25 and load the store
+        run: |
+          scripts/get_data.sh
+          scripts/load_store.sh
+
+      - name: Ground truth still complete
+        run: uv run --group eval python eval/check_truth.py
+
+      - name: Tests
+        run: uv run pytest -q
+
+      - name: Smoke run of the whole pipeline with a FakeLLM (no model, no API key)
+        run: uv run pytest tests/test_smoke.py tests/test_api_contract.py -q
