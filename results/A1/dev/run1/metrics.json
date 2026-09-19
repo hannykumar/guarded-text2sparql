@@ -1,0 +1,82 @@
+{
+  "ck25:6-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:12-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:15-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:20-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:22-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:26-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:28-en": {
+    "set_P": 1.0,
+    "set_recall": 1.0,
+    "set_F": 1.0
+  },
+  "ck25:29-en": {
+    "set_P": 0.18181818181818182,
+    "set_recall": 0.14285714285714285,
+    "set_F": 0.16
+  },
+  "ck25:31-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:35-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:38-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:42-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:46-en": {
+    "set_P": 1.0,
+    "set_recall": 1.0,
+    "set_F": 1.0
+  },
+  "ck25:48-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "ck25:49-en": {
+    "set_P": 0.0,
+    "set_recall": 0.0,
+    "set_F": 0.0
+  },
+  "average": {
+    "set_P": 0.14545454545454545,
+    "set_F": 0.14400000000000002,
+    "set_recall": 0.14285714285714285
+  }
+}
