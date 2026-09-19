@@ -1,4 +1,4 @@
-.PHONY: data store load truth truth-official serve test
+.PHONY: data store load truth truth-official serve smoke evaluate report test
 
 data:          ## download CK25 at the pinned commit
 	scripts/get_data.sh
@@ -18,6 +18,16 @@ truth-official: ## official ground truth (holds the answers, so it is not commit
 
 serve:         ## run the API on :8000
 	PYTHONPATH=src uv run uvicorn g2s.api:app --port 8000
+
+smoke:         ## a few minutes: prove the measurement plumbing with a tiny model
+	eval/run_all.sh smoke
+
+evaluate:      ## the whole measurement, unattended and resumable (hours; the machine will be slow)
+	eval/run_all.sh
+
+report:        ## rebuild results/RESULTS.md and diagnostics from whatever has been measured
+	uv run --group eval python eval/diagnostics.py
+	uv run --group eval python eval/report.py
 
 test:
 	uv run pytest -q
