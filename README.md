@@ -12,7 +12,7 @@ Needs Docker and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 make data    # download CK25 at a pinned commit (queries.ttl is deleted on arrival)
-make store   # start Oxigraph on :7878
+make store   # start Fuseki on :3030
 make load    # load prod-inst.ttl only
 make truth   # all 50 reference queries must return results
 make test

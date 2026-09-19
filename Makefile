@@ -4,7 +4,7 @@ data:          ## download CK25 at the pinned commit
 	scripts/get_data.sh
 
 store:         ## start Oxigraph on :7878
-	docker compose up -d oxigraph
+	docker compose up -d fuseki
 
 load:          ## load prod-inst.ttl (and nothing else) into the store
 	scripts/load_store.sh
