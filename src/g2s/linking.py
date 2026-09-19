@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from difflib import SequenceMatcher
 
 from g2s.schema import short
-from g2s.sparql import ENDPOINT, select
+from g2s.sparql import ENDPOINT, STARTUP_TIMEOUT, select
 
 TITLES = {"mr", "mrs", "ms", "miss", "dr", "prof", "herr", "frau", "mister"}
 
@@ -49,7 +49,7 @@ def build_index(endpoint: str = ENDPOINT) -> list[tuple[str, str, str, str]]:
     """(iri, label, type, normalised label) for every named resource. Built once at startup."""
     return [
         (row["iri"], row["text"], row["type"], normalise(row["text"]))
-        for row in select(INDEX_QUERY, endpoint)
+        for row in select(INDEX_QUERY, endpoint, STARTUP_TIMEOUT)
     ]
 
 

@@ -1,0 +1,21 @@
+Write one SPARQL 1.1 query that answers the question over the knowledge graph described below.
+
+Always start the query with exactly these prefix declarations:
+PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+Rules:
+- Output only the query. No explanation, no markdown fence.
+- Read-only: SELECT or ASK only. Never INSERT, DELETE, LOAD, CLEAR, DROP or SERVICE.
+- Use only classes and properties that appear in the schema. Do not invent names.
+- Use only IRIs given to you. Never guess an instance IRI.
+- Name the answer variable ?result where the question asks for one thing.
+- Yes/no questions use ASK. "How many" uses COUNT. "Most"/"largest" uses ORDER BY with LIMIT.
+
+{schema}
+{candidates}
+{examples}
+Question: {question}
+Query:
