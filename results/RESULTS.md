@@ -20,6 +20,17 @@ _not run yet_
 
 _not run yet_
 
+## Guardrail diagnostics
+
+From the pipeline's own traces, not from the reference answers.
+
+| Config | Questions | Clean first try | Needed repair | Repair worked | Pass at end | G1 blocks | p50 s | p95 s |
+|---|---|---|---|---|---|---|---|---|
+| A3 | 15 | 0 | 15 | 15 (100%) | 15 | 0 | 0.1 | 0.1 |
+
+First guardrail to fire, per config: `{"A3": {"G4 vocabulary": 15}}`
+
+
 ## How to read this
 
 - **dev** is the 15 questions used while building. **test** is the 35 held back until the design was frozen.

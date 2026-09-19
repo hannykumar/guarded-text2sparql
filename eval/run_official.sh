@@ -8,7 +8,8 @@ RUN=${3:-1}
 API=${API_URL:-http://localhost:8000}
 STORE=${SPARQL_ENDPOINT:-http://localhost:3030/ck/query}
 
-OUT="results/$CONFIG/$SPLIT/run$RUN"
+# RESULTS_ROOT lets a rehearsal write somewhere harmless instead of into results/
+OUT="${RESULTS_ROOT:-results}/$CONFIG/$SPLIT/run$RUN"
 mkdir -p "$OUT"
 rm -f "$OUT"/{true,answers,pred,metrics}.json "$OUT/responses.db"
 

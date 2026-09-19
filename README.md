@@ -71,11 +71,15 @@ make truth             # sanity check: all 50 reference queries return results
 make test              # the whole suite, no model or API key needed
 ```
 
-Then, to measure (this loads the model and will make the machine slow):
+```bash
+make rehearse          # seconds: proves the whole measurement harness with a stub LLM
+```
+
+Then, to measure for real (this loads the model and will make the machine slow):
 
 ```bash
 ollama pull qwen2.5-coder:7b
-make smoke             # minutes: proves the measurement plumbing with a small model
+make smoke             # minutes: one real run with the small model
 make evaluate          # the full ablation, unattended and resumable
 ```
 
