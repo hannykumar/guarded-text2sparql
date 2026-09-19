@@ -4,5 +4,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .env
+# reference answers; regenerate with `make truth-official`
+results/true.json
 responses.db
 retries.log
