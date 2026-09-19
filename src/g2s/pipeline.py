@@ -10,7 +10,7 @@ import time
 from functools import cache
 from pathlib import Path
 
-from g2s import linking, schema, trace
+from g2s import guardrails, linking, schema, trace
 from g2s.config import settings
 from g2s.llm import chat, extract_sparql
 
@@ -73,13 +73,63 @@ def generate(question: str) -> str:
     return extract_sparql(chat(filled))
 
 
+MAX_REPAIRS = 2  # G8
+
+
+@cache
+def store() -> guardrails.Store:
+    return guardrails.Store(settings.sparql_endpoint)
+
+
+def repair(question: str, query: str, errors: list[str]) -> str:
+    """LLM call 3: the model sees its own query and the exact messages the checks produced."""
+    filled = fill(
+        prompt("repair"),
+        schema=schema_card() + "\n" if settings.use_schema else "",
+        candidates=candidates_block(question) if settings.use_linking else "",
+        question=question,
+        query=query,
+        errors="\n".join(f"- {e}" for e in errors),
+    )
+    return extract_sparql(chat(filled))
+
+
 def answer(question: str) -> str:
-    """The whole flow. Guardrails and the repair loop land here next."""
+    """The whole flow: generate, check, repair at most twice, return the best we have."""
     started = time.perf_counter()
     query = generate(question)
+    if not settings.use_guardrails:
+        trace.record(question=question, query=query, seconds=round(time.perf_counter() - started, 2))
+        return query
+
+    attempts: list[dict] = []
+    fallback = query  # the last query that at least parsed, in case nothing passes
+    for attempt in range(MAX_REPAIRS + 1):
+        try:
+            query, errors, executed = guardrails.check(query, store())
+        except guardrails.Blocked as blocked:
+            # G1: not repairable. Return something harmless rather than a write query.
+            attempts.append({"attempt": attempt, "blocked": str(blocked)})
+            trace.record(question=question, query="", blocked=str(blocked), attempts=attempts,
+                         seconds=round(time.perf_counter() - started, 2))
+            return "SELECT ?result WHERE { ?result ?p ?o } LIMIT 0"
+        attempts.append({"attempt": attempt, "errors": errors, "executed": executed})
+        if not errors:
+            break
+        if executed:
+            fallback = query  # ran, but looked implausible (G7): better than a broken query
+        elif not any(e.startswith("G2") for e in errors):
+            fallback = query
+        if attempt == MAX_REPAIRS:
+            query = fallback
+            break
+        query = repair(question, query, errors)
+
     trace.record(
         question=question,
         query=query,
+        attempts=attempts,
+        repairs=len(attempts) - 1,
         seconds=round(time.perf_counter() - started, 2),
         schema=settings.use_schema,
         linking=settings.use_linking,

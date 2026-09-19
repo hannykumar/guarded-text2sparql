@@ -230,9 +230,10 @@ wheels = [
 [[package]]
 name = "guarded-text2sparql"
 version = "0.0.1"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "rdflib" },
     { name = "uvicorn" },
 ]
 
@@ -250,6 +251,7 @@ eval = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
+    { name = "rdflib", specifier = ">=7.1" },
     { name = "uvicorn", specifier = ">=0.34" },
 ]
 

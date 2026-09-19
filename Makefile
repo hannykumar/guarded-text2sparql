@@ -17,7 +17,7 @@ truth-official: ## official ground truth (holds the answers, so it is not commit
 	uv run --group eval text2sparql query data/ck25/questions.yml -e $${SPARQL_ENDPOINT:-http://localhost:3030/ck/query} -o results/true.json
 
 serve:         ## run the API on :8000
-	uv run uvicorn g2s.api:app --port 8000
+	PYTHONPATH=src uv run uvicorn g2s.api:app --port 8000
 
 test:
 	uv run pytest -q
