@@ -17,8 +17,11 @@ from g2s.sparql import ENDPOINT, STARTUP_TIMEOUT, TIMEOUT, QueryError, run, sele
 INSTANCES = "http://ld.company.org/prod-instances/"
 
 # G1: anything that writes, deletes, or calls out to another endpoint.
+# The lookbehind matters: pv:Service, ?service and prodi:add-on are ordinary names,
+# not the SERVICE keyword. Without it, every question about services was blocked.
 FORBIDDEN = re.compile(
-    r"\b(INSERT|DELETE|LOAD|CLEAR|DROP|CREATE|ADD|MOVE|COPY|SERVICE)\b", re.IGNORECASE
+    r"(?<![\w:?$])(INSERT|DELETE|LOAD|CLEAR|DROP|CREATE|ADD|MOVE|COPY|SERVICE)\b",
+    re.IGNORECASE,
 )
 READ_ONLY_START = re.compile(r"(?is)^\s*(?:(?:PREFIX|BASE)\b[^\n]*\n\s*)*(SELECT|ASK)\b")
 
@@ -107,9 +110,10 @@ def iris_in(query: str) -> set[str]:
 
 def g1_read_only(query: str) -> None:
     """Only SELECT and ASK. Update forms and federated calls are rejected, never repaired."""
-    if match := FORBIDDEN.search(query):
+    text = code_only(query)  # a keyword inside a string or comment is just text
+    if match := FORBIDDEN.search(text):
         raise Blocked(f"G1: {match.group(1).upper()} is not allowed; only read-only SELECT or ASK")
-    if not READ_ONLY_START.match(query):
+    if not READ_ONLY_START.match(text):
         raise Blocked("G1: query must be a SELECT or an ASK")
 
 
