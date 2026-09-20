@@ -37,7 +37,7 @@ report:        ## rebuild results/RESULTS.md and diagnostics from whatever has b
 
 demo:          ## rebuild the self-contained demo page from the saved results
 	PYTHONPATH=src uv run --group eval python eval/build_demo.py
-	uv run python -c "import json,pathlib; d=pathlib.Path('docs/demo_data.json').read_text(); h=pathlib.Path('docs/demo.html').read_text(); pathlib.Path('docs/demo_built.html').write_text(h.replace('__DEMO_DATA__', d.replace('</','<\\/'))); print('docs/demo_built.html')"
+	PYTHONPATH=src uv run python eval/inline_demo.py
 
 test:
 	uv run pytest -q
