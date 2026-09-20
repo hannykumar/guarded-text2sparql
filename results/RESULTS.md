@@ -9,8 +9,10 @@ it executes our query and the reference query and compares the result sets.
 
 | Config | What it adds | F1 | Precision | Recall | Exact | Runs |
 |---|---|---|---|---|---|---|
-| A0 | LLM only | 0.067 | 0.067 | 0.067 | 1.0/15 | 1 |
-| A1 | + schema card | 0.144 | 0.145 | 0.143 | 2.0/15 | 1 |
+| A0 | LLM only | 0.067 | 0.067 | 0.067 | 1.0/15 | 3 |
+| A1 | + schema card | 0.134 | 0.145 | 0.126 | 1.0/15 | 3 |
+| A2 | + entity linking | 0.149 | 0.150 | 0.148 | 2.0/15 | 3 |
+| A3 | + guardrails and repair | 0.149 | 0.150 | 0.148 | 2.0/15 | 3 |
 
 ### test
 
@@ -26,9 +28,12 @@ From the pipeline's own traces, not from the reference answers.
 
 | Config | Questions | Clean first try | Needed repair | Repair worked | Pass at end | G1 blocks | p50 s | p95 s |
 |---|---|---|---|---|---|---|---|---|
-| A3 | 15 | 0 | 15 | 15 (100%) | 15 | 0 | 0.1 | 0.1 |
+| A0 | 45 | 0 | 0 | 0 | 0 | 0 | 1.6 | 2.0 |
+| A1 | 45 | 0 | 0 | 0 | 0 | 0 | 1.2 | 1.6 |
+| A2 | 45 | 0 | 0 | 0 | 0 | 0 | 2.1 | 2.8 |
+| A3 | 45 | 18 | 27 | 6 (22%) | 24 | 0 | 4.2 | 8.4 |
 
-First guardrail to fire, per config: `{"A3": {"G4 vocabulary": 15}}`
+First guardrail to fire, per config: `{"A0": {}, "A1": {}, "A2": {}, "A3": {"G7 plausibility": 12, "G4 vocabulary": 9, "G5 entity": 3, "G2 syntax": 3}}`
 
 
 ## How to read this

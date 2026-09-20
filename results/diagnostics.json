@@ -1,21 +1,67 @@
 {
-  "A3": {
-    "questions": 15,
-    "clean_first_try": 6,
-    "needed_repair": 9,
+  "A0": {
+    "questions": 45,
+    "clean_first_try": 0,
+    "needed_repair": 0,
     "repair_succeeded": 0,
-    "repair_success_rate": 0.0,
+    "repair_success_rate": null,
     "first_problem_fixed": 0,
-    "first_problem_fixed_rate": 0.0,
-    "passing_all_guardrails_at_the_end": 6,
+    "first_problem_fixed_rate": null,
+    "passing_all_guardrails_at_the_end": 0,
+    "g1_blocks": 0,
+    "first_failure_by_guardrail": {},
+    "repairs_per_question_median": -1,
+    "seconds_p50": 1.6,
+    "seconds_p95": 2.0
+  },
+  "A1": {
+    "questions": 45,
+    "clean_first_try": 0,
+    "needed_repair": 0,
+    "repair_succeeded": 0,
+    "repair_success_rate": null,
+    "first_problem_fixed": 0,
+    "first_problem_fixed_rate": null,
+    "passing_all_guardrails_at_the_end": 0,
+    "g1_blocks": 0,
+    "first_failure_by_guardrail": {},
+    "repairs_per_question_median": -1,
+    "seconds_p50": 1.2,
+    "seconds_p95": 1.6
+  },
+  "A2": {
+    "questions": 45,
+    "clean_first_try": 0,
+    "needed_repair": 0,
+    "repair_succeeded": 0,
+    "repair_success_rate": null,
+    "first_problem_fixed": 0,
+    "first_problem_fixed_rate": null,
+    "passing_all_guardrails_at_the_end": 0,
+    "g1_blocks": 0,
+    "first_failure_by_guardrail": {},
+    "repairs_per_question_median": -1,
+    "seconds_p50": 2.1,
+    "seconds_p95": 2.8
+  },
+  "A3": {
+    "questions": 45,
+    "clean_first_try": 18,
+    "needed_repair": 27,
+    "repair_succeeded": 6,
+    "repair_success_rate": 0.222,
+    "first_problem_fixed": 9,
+    "first_problem_fixed_rate": 0.333,
+    "passing_all_guardrails_at_the_end": 24,
     "g1_blocks": 0,
     "first_failure_by_guardrail": {
-      "G7 plausibility": 6,
-      "G2 syntax": 2,
-      "G4 vocabulary": 1
+      "G7 plausibility": 12,
+      "G4 vocabulary": 9,
+      "G5 entity": 3,
+      "G2 syntax": 3
     },
-    "repairs_per_question_median": 2,
-    "seconds_p50": 125.9,
-    "seconds_p95": 242.7
+    "repairs_per_question_median": 1,
+    "seconds_p50": 4.2,
+    "seconds_p95": 8.4
   }
 }
