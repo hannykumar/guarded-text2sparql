@@ -11,6 +11,12 @@ from pathlib import Path
 from statistics import mean
 
 RESULTS = Path("results")
+SPLIT_NOTES = {
+    "dev": "The 15 questions used while building the system.",
+    "test": "The 35 questions held back until the design was frozen. **These are the honest numbers.**",
+    "ck26": "CK26: the same graph with the questions reworded (49 of 50 reference queries are "
+            "identical to CK25's). A paraphrase-robustness check, not a held-out set.",
+}
 LABELS = {
     "A0": "LLM only",
     "A1": "+ schema card",
@@ -51,7 +57,7 @@ def cell(values: list[float]) -> str:
 
 
 def table(runs: dict[tuple[str, str], list[dict]], split: str) -> list[str]:
-    rows = [f"### {split}", "", "| Config | What it adds | F1 | Precision | Recall | Exact | Runs |", "|---|---|---|---|---|---|---|"]
+    rows = [f"### {split}", "", SPLIT_NOTES.get(split, ""), "", "| Config | What it adds | F1 | Precision | Recall | Exact | Runs |", "|---|---|---|---|---|---|---|"]
     present = [(c, s) for (c, s) in runs if s == split]
     if not present:
         return [f"### {split}", "", "_not run yet_", ""]
@@ -105,7 +111,12 @@ def main() -> int:
         "## Ablation",
         "",
     ]
-    for split in ("dev", "test", "all"):
+    # whichever splits were actually measured, in a sensible reading order
+    order = ["dev", "test", "all", "ck26"]
+    found = sorted({s for _, s in runs}, key=lambda s: order.index(s) if s in order else 99)
+    if not found:
+        lines += ["_No measurements yet._", ""]
+    for split in found:
         lines += table(runs, split)
     lines += diagnostics_table()
     lines += [

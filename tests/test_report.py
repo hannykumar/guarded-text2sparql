@@ -30,7 +30,7 @@ def test_report_shows_every_config_and_the_range_over_runs(results):
     assert "| A0 |" in text and "| A3 |" in text
     assert "0.450 (0.400-0.500)" in text  # mean with range when runs disagree
     assert "0.100" in text  # single run, no range
-    assert "_not run yet_" in text  # test split absent
+    assert "### test" not in text  # a split that was never measured is simply absent
 
 
 def test_diagnostics_table_is_included_when_present(results):
@@ -49,4 +49,4 @@ def test_diagnostics_table_is_included_when_present(results):
 
 def test_no_results_at_all_still_writes_a_report(results):
     report.main()
-    assert "_not run yet_" in (report.RESULTS / "RESULTS.md").read_text()
+    assert "_No measurements yet._" in (report.RESULTS / "RESULTS.md").read_text()
