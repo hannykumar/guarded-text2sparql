@@ -1,4 +1,4 @@
-.PHONY: data store load truth truth-official serve rehearse smoke evaluate evaluate-test report test
+.PHONY: data store load truth truth-official serve rehearse smoke evaluate evaluate-test report demo test
 
 data:          ## download CK25 at the pinned commit
 	scripts/get_data.sh
@@ -34,6 +34,10 @@ evaluate-test: ## the held-back 35 questions. Only after the design is frozen
 report:        ## rebuild results/RESULTS.md and diagnostics from whatever has been measured
 	uv run --group eval python eval/diagnostics.py
 	uv run --group eval python eval/report.py
+
+demo:          ## rebuild the self-contained demo page from the saved results
+	PYTHONPATH=src uv run --group eval python eval/build_demo.py
+	uv run python -c "import json,pathlib; d=pathlib.Path('docs/demo_data.json').read_text(); h=pathlib.Path('docs/demo.html').read_text(); pathlib.Path('docs/demo_built.html').write_text(h.replace('__DEMO_DATA__', d.replace('</','<\\/'))); print('docs/demo_built.html')"
 
 test:
 	uv run pytest -q

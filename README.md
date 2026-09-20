@@ -87,6 +87,13 @@ make evaluate-test     # the 35 held-back questions, seen once
 
 `make evaluate` skips any run it has already scored, so it can be stopped and restarted.
 
+## Demo
+
+[**Open the demo page**](https://claude.ai/code/artifact/a80c0125-8df1-4a65-b2b9-e6cfd96af7ff) — all 35
+held-back questions with the query the system wrote, what each guardrail said, the answer it
+got, and a picture of the facts involved. It is self-contained: no model, no store, nothing to
+run. Rebuild it from the saved results with `make demo`.
+
 ## Results
 
 `qwen2.5-coder:7b` on one A40, temperature 0, three runs per configuration.

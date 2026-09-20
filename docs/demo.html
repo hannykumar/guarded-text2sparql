@@ -1,0 +1,479 @@
+<title>Guarded Text2SPARQL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+:root {
+  --paper: #f4f6f5;
+  --surface: #ffffff;
+  --surface-2: #eceff0;
+  --ink: #101418;
+  --ink-2: #454f56;
+  --ink-3: #6f7a80;
+  --line: #d6dcdc;
+  --copper: #a85c２b;
+  --copper: #a85c2b;
+  --teal: #2e7d6b;
+  --amber: #8a6a12;
+  --brick: #a83a30;
+  --focus-ring: #2e7d6b;
+  --shadow: 0 1px 2px rgba(16, 20, 24, .06), 0 8px 24px rgba(16, 20, 24, .06);
+  --radius: 10px;
+  --step--1: .8125rem;
+  --step-0: .9375rem;
+  --step-1: 1.125rem;
+  --step-2: 1.5rem;
+  --step-3: 2.25rem;
+}
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    --paper: #0d1114;
+    --surface: #141a1e;
+    --surface-2: #1b2328;
+    --ink: #e8edee;
+    --ink-2: #aeb9bd;
+    --ink-3: #7e8b91;
+    --line: #273238;
+    --copper: #d98d55;
+    --teal: #5cb69f;
+    --amber: #d0a84a;
+    --brick: #e0796c;
+    --focus-ring: #5cb69f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px rgba(0, 0, 0, .35);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0d1114;
+  --surface: #141a1e;
+  --surface-2: #1b2328;
+  --ink: #e8edee;
+  --ink-2: #aeb9bd;
+  --ink-3: #7e8b91;
+  --line: #273238;
+  --copper: #d98d55;
+  --teal: #5cb69f;
+  --amber: #d0a84a;
+  --brick: #e0796c;
+  --focus-ring: #5cb69f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px rgba(0, 0, 0, .35);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 var(--step-0)/1.55 "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; letter-spacing: -.012em; }
+h1 { font-size: var(--step-3); letter-spacing: -.028em; }
+h2 { font-size: var(--step-2); }
+h3 { font-size: var(--step-1); }
+p { margin: 0; }
+code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: 4px; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+header.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+.top-inner { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-end; justify-content: space-between; padding: 40px 0 28px; }
+.eyebrow {
+  font-family: "IBM Plex Mono", monospace; font-size: var(--step--1); letter-spacing: .12em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 10px;
+}
+.lede { color: var(--ink-2); max-width: 62ch; margin-top: 12px; }
+
+.scores { display: flex; gap: 8px; flex-wrap: wrap; }
+.score {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 10px 14px; min-width: 96px;
+}
+.score b { display: block; font-family: "IBM Plex Mono", monospace; font-size: var(--step-1); font-variant-numeric: tabular-nums; }
+.score span { font-size: var(--step--1); color: var(--ink-3); }
+.score.best { border-color: var(--copper); }
+.score.best b { color: var(--copper); }
+
+nav.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); background: var(--surface); }
+nav.tabs .wrap { display: flex; gap: 4px; }
+.tab {
+  appearance: none; background: none; border: 0; border-bottom: 2px solid transparent;
+  padding: 12px 14px; font: 500 var(--step-0) "IBM Plex Sans", sans-serif; color: var(--ink-3); cursor: pointer;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--copper); }
+.tab:hover { color: var(--ink); }
+
+main { padding: 28px 0 64px; }
+.panel[hidden] { display: none; }
+
+/* --- question explorer --- */
+.workbench { display: grid; grid-template-columns: minmax(240px, 300px) 1fr; gap: 20px; align-items: start; }
+@media (max-width: 860px) { .workbench { grid-template-columns: 1fr; } }
+
+.qlist { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.qlist-head { padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: var(--step--1); color: var(--ink-3); }
+.qscroll { max-height: 70vh; overflow-y: auto; }
+.qitem {
+  display: flex; gap: 10px; align-items: baseline; width: 100%; text-align: left;
+  background: none; border: 0; border-bottom: 1px solid var(--line); padding: 10px 14px;
+  font: 400 var(--step--1)/1.45 "IBM Plex Sans", sans-serif; color: var(--ink-2); cursor: pointer;
+}
+.qitem:hover { background: var(--surface-2); color: var(--ink); }
+.qitem[aria-current="true"] { background: var(--surface-2); color: var(--ink); box-shadow: inset 3px 0 0 var(--copper); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; translate: 0 -1px; }
+.dot.right { background: var(--teal); }
+.dot.partial { background: var(--amber); }
+.dot.wrong { background: var(--brick); opacity: .55; }
+
+.detail { display: grid; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.card-head {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--line);
+}
+.card-head h3 { font-size: var(--step--1); text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3); font-weight: 600; }
+.card-body { padding: 16px; }
+.question-text { font-size: var(--step-1); line-height: 1.4; }
+.qmeta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: var(--step--1); color: var(--ink-3); }
+.qmeta .mono { color: var(--ink-2); }
+
+pre.sparql {
+  margin: 0; padding: 16px; overflow-x: auto; background: var(--surface-2);
+  font-size: var(--step--1); line-height: 1.5; border-radius: 0 0 var(--radius) var(--radius);
+}
+.kw { color: var(--copper); font-weight: 600; }
+.iri { color: var(--teal); }
+.var { color: var(--ink-2); }
+
+.checks { display: grid; gap: 8px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: var(--step--1); }
+.badge {
+  font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 5px; flex: none; border: 1px solid;
+}
+.badge.pass { color: var(--teal); border-color: color-mix(in srgb, var(--teal) 40%, transparent); background: color-mix(in srgb, var(--teal) 10%, transparent); }
+.badge.fail { color: var(--brick); border-color: color-mix(in srgb, var(--brick) 40%, transparent); background: color-mix(in srgb, var(--brick) 10%, transparent); }
+.answers { display: flex; flex-wrap: wrap; gap: 6px; }
+.answers li { list-style: none; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px; font-size: var(--step--1); }
+.answers { margin: 0; padding: 0; }
+
+figure.graph { margin: 0; }
+svg.canvas { display: block; width: 100%; height: 420px; background: var(--surface); border-radius: 0 0 var(--radius) var(--radius); }
+svg.canvas text { font-family: "IBM Plex Mono", monospace; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: var(--step--1); color: var(--ink-3); padding: 0 16px 14px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+
+/* --- schema map --- */
+.schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.cls { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.cls h4 { margin: 0 0 4px; font-size: var(--step-0); font-family: "IBM Plex Mono", monospace; color: var(--copper); font-weight: 600; }
+.cls .count { font-size: var(--step--1); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.cls p { font-size: var(--step--1); color: var(--ink-2); margin-top: 8px; }
+table.props { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+table.props th, table.props td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+table.props th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+table.props td:first-child { font-family: "IBM Plex Mono", monospace; color: var(--copper); white-space: nowrap; }
+table.props .arrow { color: var(--ink-3); }
+.scroll-x { overflow-x: auto; }
+
+/* --- ask box --- */
+.ask { display: flex; gap: 8px; flex-wrap: wrap; }
+.ask input {
+  flex: 1 1 320px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--paper); color: var(--ink); font: 400 var(--step-0) "IBM Plex Sans", sans-serif;
+}
+.ask button {
+  padding: 11px 18px; border-radius: 8px; border: 1px solid var(--copper); cursor: pointer;
+  background: var(--copper); color: #fff; font: 600 var(--step-0) "IBM Plex Sans", sans-serif;
+}
+.ask button:hover { filter: brightness(1.06); }
+.note { font-size: var(--step--1); color: var(--ink-3); margin-top: 10px; }
+footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--ink-3); font-size: var(--step--1); }
+@media (prefers-reduced-motion: no-preference) { .qitem, .tab { transition: background .12s ease, color .12s ease; } }
+</style>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div>
+      <div class="eyebrow">CK25 · text to SPARQL</div>
+      <h1>Guarded Text2SPARQL</h1>
+      <p class="lede">
+        A question in plain English becomes a database query over a company knowledge graph.
+        A language model proposes the query; deterministic checks decide whether it may be
+        returned. Every query below was produced by the system on questions it had never seen.
+      </p>
+    </div>
+    <div class="scores" id="scores"></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <button class="tab" id="tab-questions" aria-selected="true" aria-controls="panel-questions">35 test questions</button>
+    <button class="tab" id="tab-schema" aria-selected="false" aria-controls="panel-schema">The graph's shape</button>
+    <button class="tab" id="tab-ask" aria-selected="false" aria-controls="panel-ask">Ask your own</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="panel" id="panel-questions">
+    <div class="workbench">
+      <aside class="qlist">
+        <div class="qlist-head">Held-back questions · <span id="right-count"></span></div>
+        <div class="qscroll" id="qlist" role="listbox" aria-label="Test questions"></div>
+      </aside>
+      <div class="detail" id="detail"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-schema" hidden>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head"><h3>What kinds of thing exist</h3></div>
+      <div class="card-body">
+        <p class="lede" style="margin:0 0 14px">
+          The graph holds one fictional electronics company: people, departments, products,
+          suppliers, prices and bills of material. This list is also what the model is shown
+          before it writes a query — it cannot use a name that is not here.
+        </p>
+        <div class="schema-grid" id="classes"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>How they connect</h3></div>
+      <div class="scroll-x"><table class="props" id="props"></table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-ask" hidden>
+    <div class="card">
+      <div class="card-head"><h3>Ask your own question</h3></div>
+      <div class="card-body">
+        <p class="lede" style="margin-bottom:14px">
+          This sends the question to the pipeline running on your own machine
+          (<code>make store load</code>, then <code>make serve</code>, with a model available).
+          It will not work from a shared link — the saved questions above need nothing running.
+        </p>
+        <form class="ask" id="ask-form">
+          <input id="ask-input" placeholder="Which suppliers do we have in Toulouse?" aria-label="Your question">
+          <button type="submit">Generate SPARQL</button>
+        </form>
+        <div id="ask-out" class="note"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  Dataset: CK25 by eccenca GmbH, CC-BY-4.0. Model: qwen2.5-coder:7b, Apache-2.0.
+  Scored with the official TEXT2SPARQL client by executing both queries and comparing results.
+</footer>
+
+<script id="demo-data" type="application/json">__DEMO_DATA__</script>
+<script>
+const DATA = JSON.parse(document.getElementById("demo-data").textContent);
+const $ = (id) => document.getElementById(id);
+
+/* ---------- headline scores ---------- */
+const LABELS = { A0: "model alone", A1: "+ schema", A2: "+ linking", A3: "+ guardrails" };
+$("scores").innerHTML = Object.entries(DATA.scores).map(([k, v]) =>
+  `<div class="score${k === "A2" || k === "A3" ? " best" : ""}">
+     <b>${v.toFixed(3)}</b><span>${k} · ${LABELS[k]}</span>
+   </div>`).join("");
+
+/* ---------- tabs ---------- */
+for (const name of ["questions", "schema", "ask"]) {
+  $("tab-" + name).addEventListener("click", () => {
+    for (const other of ["questions", "schema", "ask"]) {
+      $("tab-" + other).setAttribute("aria-selected", String(other === name));
+      $("panel-" + other).hidden = other !== name;
+    }
+  });
+}
+
+/* ---------- question list ---------- */
+const grade = (f1) => f1 > 0.99 ? "right" : f1 > 0 ? "partial" : "wrong";
+const rightCount = DATA.questions.filter(q => q.f1 > 0.99).length;
+$("right-count").textContent = `${rightCount} fully correct, ${DATA.questions.filter(q => q.f1 > 0 && q.f1 <= 0.99).length} partly`;
+
+$("qlist").innerHTML = DATA.questions.map((q, i) =>
+  `<button class="qitem" data-i="${i}" role="option" aria-current="${i === 0}">
+     <span class="dot ${grade(q.f1)}"></span><span>${escapeHtml(q.question)}</span>
+   </button>`).join("");
+
+$("qlist").addEventListener("click", (event) => {
+  const button = event.target.closest(".qitem");
+  if (!button) return;
+  for (const item of $("qlist").children) item.setAttribute("aria-current", "false");
+  button.setAttribute("aria-current", "true");
+  show(DATA.questions[Number(button.dataset.i)]);
+});
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function highlight(query) {
+  return escapeHtml(query)
+    .replace(/\b(PREFIX|SELECT|DISTINCT|WHERE|FILTER|OPTIONAL|GROUP BY|ORDER BY|LIMIT|OFFSET|ASK|BIND|HAVING|COUNT|SUM|AVG|MIN|MAX|NOT EXISTS|AS|DESC|ASC|a)\b/g,
+      '<span class="kw">$1</span>')
+    .replace(/&lt;(http[^&]*)&gt;/g, '<span class="iri">&lt;$1&gt;</span>')
+    .replace(/(\?\w+)/g, '<span class="var">$1</span>');
+}
+
+/* ---------- detail ---------- */
+function show(q) {
+  const verdict = q.f1 > 0.99 ? "matched the reference answer"
+    : q.f1 > 0 ? `partly right (F1 ${q.f1.toFixed(2)})` : "wrong";
+  const finalErrors = q.checks.length ? q.checks[q.checks.length - 1].errors : [];
+
+  $("detail").innerHTML = `
+    <div class="card">
+      <div class="card-body">
+        <p class="question-text">${escapeHtml(q.question)}</p>
+        <div class="qmeta">
+          <span class="mono">${q.id}</span>
+          <span>${verdict}</span>
+          <span>${q.repairs} repair${q.repairs === 1 ? "" : "s"}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>The query it wrote</h3></div>
+      <pre class="sparql">${highlight(q.query || "(nothing usable)")}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>What the checks said</h3></div>
+      <div class="card-body checks">
+        ${q.checks.map(c => `
+          <div class="check">
+            <span class="badge ${c.errors.length ? "fail" : "pass"}">${c.errors.length ? "stopped" : "passed"}</span>
+            <span>${c.attempt === 0 ? "First attempt" : "After repair " + c.attempt}: ${
+              c.errors.length ? escapeHtml(c.errors.join(" · ")) : "read-only, parses, vocabulary and IRIs exist, runs"
+            }</span>
+          </div>`).join("") || '<div class="check"><span class="badge pass">passed</span><span>No guardrail issues recorded.</span></div>'}
+        ${finalErrors.length ? '<p class="note">Returned anyway as the best available query — the system knew it was imperfect.</p>' : ""}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>What the graph answered</h3></div>
+      <div class="card-body"><ul class="answers">${q.rows.map(r => `<li>${escapeHtml(r)}</li>`).join("")}</ul></div>
+    </div>
+
+    <figure class="card graph">
+      <div class="card-head"><h3>The facts involved</h3></div>
+      ${renderGraph(q.graph)}
+      <figcaption class="legend">
+        <span><i style="background:var(--copper)"></i>named in the query</span>
+        <span><i style="background:var(--teal)"></i>connected fact</span>
+        <span><i style="background:var(--ink-3)"></i>plain value</span>
+      </figcaption>
+    </figure>`;
+}
+
+/* ---------- graph drawing: a small deterministic spring layout ---------- */
+function renderGraph(graph) {
+  const { nodes, edges } = graph;
+  if (!nodes.length) return '<div class="card-body"><p class="note">This question names no specific thing, so there is no small picture to draw — it asks about a whole class of things.</p></div>';
+
+  const W = 900, H = 420, cx = W / 2, cy = H / 2;
+  const pos = nodes.map((n, i) => {
+    const angle = (i / nodes.length) * Math.PI * 2;
+    const radius = n.focus ? 70 : 165;
+    return { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius };
+  });
+  const index = new Map(nodes.map((n, i) => [n.id, i]));
+
+  // a few relaxation passes: pull linked nodes together, push everything else apart
+  for (let pass = 0; pass < 260; pass++) {
+    for (const e of edges) {
+      const a = index.get(e.from), b = index.get(e.to);
+      if (a === undefined || b === undefined) continue;
+      const dx = pos[b].x - pos[a].x, dy = pos[b].y - pos[a].y;
+      const d = Math.hypot(dx, dy) || 1, k = (d - 150) * 0.012;
+      pos[a].x += dx / d * k; pos[a].y += dy / d * k;
+      pos[b].x -= dx / d * k; pos[b].y -= dy / d * k;
+    }
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = pos[j].x - pos[i].x, dy = pos[j].y - pos[i].y;
+        const d = Math.hypot(dx, dy) || 1;
+        if (d < 130) {
+          const push = (130 - d) * 0.09;
+          pos[i].x -= dx / d * push; pos[i].y -= dy / d * push;
+          pos[j].x += dx / d * push; pos[j].y += dy / d * push;
+        }
+      }
+      pos[i].x += (cx - pos[i].x) * 0.004;
+      pos[i].y += (cy - pos[i].y) * 0.006;
+      pos[i].x = Math.max(70, Math.min(W - 70, pos[i].x));
+      pos[i].y = Math.max(28, Math.min(H - 28, pos[i].y));
+    }
+  }
+
+  const lines = edges.map(e => {
+    const a = index.get(e.from), b = index.get(e.to);
+    if (a === undefined || b === undefined) return "";
+    const mx = (pos[a].x + pos[b].x) / 2, my = (pos[a].y + pos[b].y) / 2;
+    return `<line x1="${pos[a].x.toFixed(1)}" y1="${pos[a].y.toFixed(1)}" x2="${pos[b].x.toFixed(1)}" y2="${pos[b].y.toFixed(1)}"
+              stroke="var(--line)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+            <text x="${mx.toFixed(1)}" y="${(my - 4).toFixed(1)}" font-size="10" fill="var(--ink-3)" text-anchor="middle">${escapeHtml(e.label)}</text>`;
+  }).join("");
+
+  const dots = nodes.map((n, i) => {
+    const isValue = n.type === "value";
+    const fill = n.focus ? "var(--copper)" : isValue ? "var(--ink-3)" : "var(--teal)";
+    const r = n.focus ? 9 : 6;
+    const label = n.label.length > 26 ? n.label.slice(0, 25) + "…" : n.label;
+    return `<g><title>${escapeHtml(n.label)}${n.type && n.type !== "value" ? " · " + escapeHtml(n.type) : ""}</title>
+      <circle cx="${pos[i].x.toFixed(1)}" cy="${pos[i].y.toFixed(1)}" r="${r}" fill="${fill}"
+              stroke="var(--surface)" stroke-width="2"></circle>
+      <text x="${pos[i].x.toFixed(1)}" y="${(pos[i].y - (r + 7)).toFixed(1)}" font-size="11"
+            fill="var(--ink)" text-anchor="middle" font-weight="${n.focus ? 600 : 400}">${escapeHtml(label)}</text></g>`;
+  }).join("");
+
+  return `<svg class="canvas" viewBox="0 0 ${W} ${H}" role="img" aria-label="The facts this question touches">
+    <defs><marker id="arrow" viewBox="0 0 8 8" refX="14" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="var(--line)"></path></marker></defs>
+    ${lines}${dots}</svg>`;
+}
+
+/* ---------- schema panel ---------- */
+$("classes").innerHTML = DATA.schema.classes.map(c => `
+  <div class="cls">
+    <h4>${escapeHtml(c.id)}</h4>
+    <div class="count">${c.instances ? c.instances.toLocaleString() + " in the graph" : "abstract, no direct members"}</div>
+    ${c.comment ? `<p>${escapeHtml(c.comment)}</p>` : ""}
+  </div>`).join("");
+
+$("props").innerHTML = `
+  <thead><tr><th>Relationship</th><th>From</th><th></th><th>To</th></tr></thead>
+  <tbody>${DATA.schema.properties.map(p => `
+    <tr><td>${escapeHtml(p.id)}</td><td>${escapeHtml(p.from)}</td>
+        <td class="arrow">→</td><td>${escapeHtml(p.to)}</td></tr>`).join("")}</tbody>`;
+
+/* ---------- ask your own ---------- */
+$("ask-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const question = $("ask-input").value.trim();
+  if (!question) return;
+  $("ask-out").textContent = "Asking the local pipeline…";
+  const url = "http://localhost:8000/?dataset=" +
+    encodeURIComponent("https://text2sparql.aksw.org/2025/corporate/") +
+    "&question=" + encodeURIComponent(question);
+  try {
+    const response = await fetch(url);
+    const body = await response.json();
+    $("ask-out").innerHTML = `<pre class="sparql" style="border-radius:8px;margin-top:10px">${highlight(body.query || "(no query)")}</pre>`;
+  } catch {
+    $("ask-out").textContent =
+      "No local pipeline answered on port 8000. Start it with `make serve` (and have a model running), then try again. This never works from a shared link.";
+  }
+});
+
+show(DATA.questions[0]);
+</script>

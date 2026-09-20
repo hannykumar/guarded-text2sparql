@@ -15,3 +15,4 @@ retries.log
 results/traces.jsonl
 results/*.jsonl
 results/logs/
+docs/demo_built.html
