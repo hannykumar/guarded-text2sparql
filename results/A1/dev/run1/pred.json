@@ -21,7 +21,36 @@
     "5.97": 1,
     "5.96": 1
   },
-  "ck25:31-en": {},
+  "ck25:31-en": {
+    "http://ld.company.org/prod-instances/prod-cat-Resistor": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Driver": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Transistor": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Strain": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Encoder": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Inductor": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Meter": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Warp": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Rheostat": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Gauge": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Resonator": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Oscillator": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Multiplexer": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Crystal": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Transducer": 1,
+    "http://ld.company.org/prod-instances/prod-cat-LCD": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Transformer": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Network": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Potentiometer": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Sensor": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Coil": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Switch": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Breaker": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Capacitor": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Compensator": 1,
+    "http://ld.company.org/prod-instances/prod-cat-Memristor": 1,
+    "1": 1,
+    "20": 1
+  },
   "ck25:35-en": {},
   "ck25:38-en": {
     "Adolfina Hoch": 1,
@@ -139,8 +168,21 @@
     "Procurement": 1,
     "Production": 1
   },
-  "ck25:42-en": {},
-  "ck25:46-en": {},
+  "ck25:42-en": {
+    "http://ld.company.org/prod-instances/bom-8": 1,
+    "4.0": 1
+  },
+  "ck25:46-en": {
+    "http://ld.company.org/prod-instances/suppl-2a51afd9-a3de-45ee-8ada-b74203fed37b": 1,
+    "http://ld.company.org/prod-instances/suppl-445081d6-305c-4fb7-b89e-82c86969d4bd": 1,
+    "http://ld.company.org/prod-instances/suppl-11f1284a-d6f0-4822-b716-3e70d1fb91df": 1,
+    "http://ld.company.org/prod-instances/suppl-888698ef-ad70-4022-9624-4dc111f56c01": 1,
+    "http://ld.company.org/prod-instances/suppl-0d183bba-b1df-4c41-be10-c0896378b406": 1,
+    "0.962": 1,
+    "0.951": 1,
+    "0.945": 1,
+    "0.942": 1
+  },
   "ck25:48-en": {},
   "ck25:49-en": {
     "0": 1

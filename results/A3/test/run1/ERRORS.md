@@ -1,19 +1,22 @@
 # Error analysis: results/A3/test/run1
 
-30 of 35 questions scored below 1.0. Label the cause of each by hand.
+24 of 35 questions scored below 1.0. Label the cause of each by hand.
 
 Causes: `wrong entity`, `wrong property`, `wrong direction`, `missing aggregation`, `wrong ORDER BY / LIMIT`, `wrong answer shape`, `other`
 
-## ck25:10-en (F1 0.00)
+## ck25:1-en (F1 0.67)
 
-**Question:** What is the name of the Network expert from the Marketing Department?
+**Question:** In which department is Ms. Brant?
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT DISTINCT ?result WHERE {
-  ?networkExpert a pv:Hardware ; pv:name "Network expert" .
-  ?networkExpert pv:memberOf <http://ld.company.org/prod-instances/dept-85880> .
-  BIND(?networkExpert AS ?result)
+  VALUES ?brant { prodi:empl-Karen.Brant%40company.org prodi:empl-Sylvester.Brant%40company.org }
+  ?brant pv:memberOf ?result .
 }
 ```
 
@@ -22,23 +25,30 @@ SELECT DISTINCT ?result WHERE {
 
 **Cause:** _________
 
-## ck25:11-en (F1 0.00)
+## ck25:11-en (F1 0.80)
 
 **Question:** Which departments have Transducer Experts?
 
 ```sparql
+PREFIX prodi: <http://ld.company.org/prod-instances/>
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT DISTINCT ?department WHERE {
-  ?employee a pv:Employee ; pv:areaOfExpertise <http://ld.company.org/prod-instances/hw-T341-6404509> .
-  ?manager a pv:Manager ; pv:hasDirectReport ?employee .
-  ?department a pv:Department ; pv:responsibleFor ?product .
-  ?product a pv:Product ; pv:hasProductManager ?manager ;
-    pv:compatibleProduct <http://ld.company.org/prod-instances/hw-T341-6404509> .
+  VALUES ?product { 
+    prodi:hw-T341-6404509
+    prodi:hw-E709-4829800
+    prodi:hw-M133-5945489
+  }
+  ?product pv:hasProductManager ?manager .
+  ?manager pv:memberOf ?department .
 }
 ```
 
 **Guardrails at the end:** all passed
-**Repairs:** 0
+**Repairs:** 2
 
 **Cause:** _________
 
@@ -48,13 +58,20 @@ SELECT DISTINCT ?department WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT (COUNT(DISTINCT ?supplier) AS ?result) WHERE {
-  ?supplier a pv:Supplier ; pv:country <http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7> .
+  VALUES ?franceSupplier { prodi:suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7 prodi:suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6 prodi:suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09 }
+  ?supplier a pv:Supplier ;
+              pv:country "France" .
+  FILTER(?supplier = ?franceSupplier)
 }
 ```
 
 **Guardrails at the end:** all passed
-**Repairs:** 0
+**Repairs:** 1
 
 **Cause:** _________
 
@@ -64,32 +81,19 @@ SELECT (COUNT(DISTINCT ?supplier) AS ?result) WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT DISTINCT ?supplier WHERE {
-  ?product a pv:Hardware ; pv:name "LCD Compensator" .
-  ?bom pv:hasPart [ pv:part ?product ] ;
-        pv:hasSupplier ?supplier .
-  ?supplier pv:country "France" .
-}
-```
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-**Guardrails at the end:** all passed
-**Repairs:** 0
-
-**Cause:** _________
-
-## ck25:17-en (F1 0.00)
-
-**Question:** Which suppliers do we have in Toulouse?
-
-```sparql
-PREFIX pv: <http://ld.company.org/prod-vocab/>
 SELECT DISTINCT ?result WHERE {
-  ?supplier a pv:Supplier ; pv:addressLocality "Toulouse" .
+  ?product a pv:Hardware ; pv:hasCategory <http://ld.company.org/prod-instances/prod-cat-Compensator> ; pv:hasSupplier ?supplier .
+  ?supplier pv:country "France" .
+  ?supplier pv:name ?result .
 }
 ```
 
-**Guardrails at the end:** all passed
-**Repairs:** 0
+**Guardrails at the end:** G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties.
+**Repairs:** 2
 
 **Cause:** _________
 
@@ -99,14 +103,16 @@ SELECT DISTINCT ?result WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT ?result WHERE {
-  ?oscillator a pv:Hardware ; pv:name "Oscillator" ;
-    pv:price [ pv:amount ?amount ; pv:currency "EUR" ] .
-  FILTER(?amount = (SELECT MIN(?amount) WHERE {
-    ?otherOscillator a pv:Hardware ; pv:name "Oscillator" ;
-      pv:price [ pv:amount ?amount ; pv:currency "EUR" ] .
-  }))
-}
+  ?oscillator a pv:Hardware ;
+              pv:hasCategory prodi:prod-cat-Oscillator ;
+              pv:price ?price .
+  ?price pv:amount ?amount .
+} ORDER BY ?amount LIMIT 1
 ```
 
 **Guardrails at the end:** all passed
@@ -120,13 +126,15 @@ SELECT ?result WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT ?result WHERE {
   ?service a pv:Service ;
            pv:price ?price .
-  ?price pv:amount ?amount ;
-          pv:currency ?currency .
-  FILTER(?amount = (SELECT MAX(?amount) WHERE { ?price2 pv:amount ?amount2 . }))
-}
+  ?price pv:amount ?amount .
+} ORDER BY DESC(?amount) LIMIT 1
 ```
 
 **Guardrails at the end:** all passed
@@ -140,12 +148,18 @@ SELECT ?result WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT ?result WHERE {
-  ?result a pv:Hardware ;
-           pv:weight_g ?weight ;
-           pv:areaOfExpertise pv:prod-cat-Coil .
-  FILTER(?weight = (SELECT MAX(?w) FROM { ?part a pv:BomPart ; pv:hasProduct ?result ; pv:quantity ?q . BIND(?q * ?w AS ?w) }))
-}
+  ?coil a pv:Hardware ;
+          pv:hasCategory prodi:prod-cat-Coil ;
+          pv:width_mm ?width ;
+          pv:depth_mm ?depth ;
+          pv:weight_g ?weight .
+  FILTER(?width * ?depth <= 15 * 15)
+} ORDER BY DESC(?weight) LIMIT 1
 ```
 
 **Guardrails at the end:** all passed
@@ -159,15 +173,19 @@ SELECT ?result WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT DISTINCT ?product WHERE {
-  ?supplier a pv:Supplier ; pv:country "United States" .
-  ?product pv:hasSupplier ?supplier ;
-           pv:compatibleProduct <http://ld.company.org/prod-instances/hw-U990-5234138> .
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT DISTINCT ?result WHERE {
+  ?product pv:hasSupplier ?supplier .
+  ?supplier pv:country "US" .
+  ?product pv:compatibleProduct prodi:hw-U990-5234138 .
 }
 ```
 
-**Guardrails at the end:** all passed
-**Repairs:** 0
+**Guardrails at the end:** G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties.
+**Repairs:** 2
 
 **Cause:** _________
 
@@ -177,13 +195,18 @@ SELECT DISTINCT ?product WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT DISTINCT ?result WHERE {
-  ?pontiometer a pv:Hardware ; pv:name "pontiometer" .
-  ?pontiometer pv:depth_mm ?depth ; pv:height_mm ?height ; pv:width_mm ?width .
-  BIND(?depth * ?height * ?width AS ?volume) .
-  ORDER BY ASC(?volume)
-  LIMIT 1
-}
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?result WHERE {
+  ?poti a pv:Hardware ;
+          pv:hasCategory prodi:prod-cat-Potentiometer ;
+          pv:depth_mm ?depth ;
+          pv:height_mm ?height ;
+          pv:width_mm ?width .
+  BIND(?depth * ?height * ?width AS ?volume)
+} ORDER BY ASC(?volume) LIMIT 1
 ```
 
 **Guardrails at the end:** all passed
@@ -197,14 +220,18 @@ SELECT DISTINCT ?result WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT (MAX(?density) AS ?maxDensity) WHERE {
-  ?coil a pv:Hardware ; pv:weight_g ?weight ; pv:height_mm ?height .
-  BIND((?weight / (?height * ?height)) AS ?density)
-} ORDER BY DESC(?maxDensity) LIMIT 1
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?result WHERE {
+  ?coil a pv:Hardware ; pv:hasCategory prodi:prod-cat-Coil ; pv:weight_g ?weight ; pv:depth_mm ?depth ; pv:height_mm ?height ; pv:width_mm ?width .
+  BIND(?weight / (?depth * ?height * ?width) AS ?density)
+} ORDER BY DESC(?density) LIMIT 1
 ```
 
 **Guardrails at the end:** all passed
-**Repairs:** 0
+**Repairs:** 1
 
 **Cause:** _________
 
@@ -214,12 +241,16 @@ SELECT (MAX(?density) AS ?maxDensity) WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT ?name ?email ?phone WHERE {
-  ?employee a pv:Employee ;
-             pv:name ?name ;
-             pv:email ?email ;
-             pv:phone ?phone .
-  FILTER NOT EXISTS { ?manager a pv:Manager ; pv:hasDirectReport ?employee } .
+  ?employee a pv:Employee .
+  FILTER NOT EXISTS { ?manager pv:hasDirectReport ?employee }
+  ?employee pv:name ?name ;
+            pv:email ?email ;
+            pv:phone ?phone .
 } ORDER BY ?name
 ```
 
@@ -234,10 +265,11 @@ SELECT ?name ?email ?phone WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?department (COUNT(?employee) AS ?numEmployees) WHERE {
+SELECT ?result (COUNT(?employee) AS ?employees) WHERE {
   ?department a pv:Department ;
-               pv:memberOf ?employee .
-} GROUP BY ?department HAVING (?numEmployees > 5)
+              pv:name ?result ;
+              pv:hasDirectReport ?employee .
+} GROUP BY ?result HAVING (?employees > 5)
 ```
 
 **Guardrails at the end:** all passed
@@ -251,9 +283,15 @@ SELECT ?department (COUNT(?employee) AS ?numEmployees) WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?supplier (ROUND(AVG(?price)) AS ?averagePriceEUR) WHERE {
-  ?product a pv:Product ; pv:hasSupplier ?supplier .
-  ?price a pv:Price ; pv:currency "EUR" ; pv:amount ?amount .
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?supplier (ROUND(AVG(?amount)) AS ?averagePrice) WHERE {
+  ?product pv:hasSupplier ?supplier .
+  ?product pv:price ?price .
+  ?price pv:currency "EUR" ;
+           pv:amount ?amount .
 } GROUP BY ?supplier
 ```
 
@@ -269,28 +307,8 @@ SELECT ?supplier (ROUND(AVG(?price)) AS ?averagePriceEUR) WHERE {
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
 ASK {
-  ?department a pv:Department ;
-               pv:hasManager ?manager .
-}
-```
-
-**Guardrails at the end:** all passed
-**Repairs:** 0
-
-**Cause:** _________
-
-## ck25:34-en (F1 0.00)
-
-**Question:** I need to update my supplier rolodex, give me every supplier's name and all address details.
-
-```sparql
-PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?supplierName ?addressCountry ?addressLocality ?addressText WHERE {
-  ?supplier a pv:Supplier ;
-             pv:name ?supplierName ;
-             pv:addressCountryCode ?addressCountry ;
-             pv:addressLocality ?addressLocality ;
-             pv:addressText ?addressText .
+  ?dept a pv:Department .
+  FILTER NOT EXISTS { ?dept pv:hasManager ?manager }
 }
 ```
 
@@ -305,12 +323,16 @@ SELECT ?supplierName ?addressCountry ?addressLocality ?addressText WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?areaOfExpertise (COUNT(?product) AS ?count) WHERE {
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?result (COUNT(?product) AS ?products) WHERE {
+  ?agent a pv:Employee ;
+           pv:areaOfExpertise ?result .
   ?product a pv:Product ;
-            pv:hasCategory ?category ;
-            pv:hasProductManager ?manager .
-  ?manager pv:areaOfExpertise ?areaOfExpertise .
-} GROUP BY ?areaOfExpertise ORDER BY DESC(?count) LIMIT 3
+             pv:hasCategory ?result .
+} GROUP BY ?result ORDER BY DESC(?products) LIMIT 3
 ```
 
 **Guardrails at the end:** all passed
@@ -324,28 +346,20 @@ SELECT ?areaOfExpertise (COUNT(?product) AS ?count) WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?bom (COUNT(?part) AS ?partCount) (SUM(?quantity) AS ?totalQuantity) WHERE {
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?bom (COUNT(?part) AS ?numParts) (SUM(?quantity) AS ?totalQuantity)
+WHERE {
   ?bom a pv:BillOfMaterial ;
-        pv:hasBomPart ?part .
-  ?part pv:quantity ?quantity .
-} GROUP BY ?bom HAVING (?totalQuantity > 600) ORDER BY DESC(?totalQuantity)
-```
-
-**Guardrails at the end:** all passed
-**Repairs:** 0
-
-**Cause:** _________
-
-## ck25:39-en (F1 0.00)
-
-**Question:** Which hardware items are wider than they are tall, and have a depth under 50 mm? List their dimensions.
-
-```sparql
-PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?hardware (pv:width_mm(?hardware) AS ?width) (pv:height_mm(?hardware) AS ?height) (pv:depth_mm(?hardware) AS ?depth) WHERE {
-  ?hardware a pv:Hardware ; pv:width_mm ?width ; pv:height_mm ?height ; pv:depth_mm ?depth .
-  FILTER (?width > ?height && ?depth < 50)
+         pv:hasBomPart ?bomPart .
+  ?bomPart pv:hasPart ?part ;
+           pv:quantity ?quantity .
 }
+GROUP BY ?bom
+HAVING (?totalQuantity > 600)
+ORDER BY DESC(?totalQuantity)
 ```
 
 **Guardrails at the end:** all passed
@@ -353,39 +367,26 @@ SELECT ?hardware (pv:width_mm(?hardware) AS ?width) (pv:height_mm(?hardware) AS 
 
 **Cause:** _________
 
-## ck25:4-en (F1 0.00)
-
-**Question:** What is the email of Sabrina from Marketing?
-
-```sparql
-PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT DISTINCT ?result WHERE {
-  ?employee a pv:Employee ; pv:name "Sabrina" ; pv:memberOf <http://ld.company.org/prod-instances/dept-85880> .
-  ?employee pv:email ?result .
-}
-```
-
-**Guardrails at the end:** all passed
-**Repairs:** 0
-
-**Cause:** _________
-
-## ck25:40-en (F1 0.00)
+## ck25:40-en (F1 0.10)
 
 **Question:** Which hardware items - list id and name - have no active product manager?
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT ?id ?name WHERE {
-  ?hw a pv:Hardware ;
-       pv:id ?id ;
-       pv:name ?name .
-  FILTER NOT EXISTS { ?hw pv:hasProductManager ?manager . }
+  ?hardware a pv:Hardware ;
+              pv:id ?id ;
+              pv:name ?name .
+  FILTER NOT EXISTS { [] pv:hasProductManager ?hardware }
 }
 ```
 
 **Guardrails at the end:** all passed
-**Repairs:** 0
+**Repairs:** 1
 
 **Cause:** _________
 
@@ -395,14 +396,28 @@ SELECT ?id ?name WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?manager (COUNT(?employee) AS ?teamSize) WHERE {
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?manager (COUNT(?sameDeptEmployee) AS ?sameDeptCount) (COUNT(?allReports) AS ?totalReports) 
+       ((COUNT(?sameDeptEmployee) / COUNT(?allReports)) * 100 AS ?percentage)
+WHERE {
   ?manager a pv:Manager ;
-            pv:hasDirectReport ?employee .
-} GROUP BY ?manager
+             pv:hasDirectReport ?allReports .
+  OPTIONAL {
+    ?allReports pv:memberOf ?dept .
+    ?manager pv:memberOf ?dept .
+    FILTER(?allReports != ?manager)
+    BIND(?allReports AS ?sameDeptEmployee)
+  }
+}
+GROUP BY ?manager
+HAVING (COUNT(?allReports) > 0)
 ```
 
 **Guardrails at the end:** all passed
-**Repairs:** 0
+**Repairs:** 1
 
 **Cause:** _________
 
@@ -412,9 +427,16 @@ SELECT ?manager (COUNT(?employee) AS ?teamSize) WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?id ?name ?width_mm WHERE {
-  ?hw a pv:Hardware ; pv:id ?id ; pv:name ?name ; pv:width_mm ?width_mm .
-} ORDER BY DESC(?width_mm) LIMIT 10
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?result ?id ?name ?width WHERE {
+  ?hardware a pv:Hardware ;
+              pv:id ?id ;
+              pv:name ?name ;
+              pv:width_mm ?width .
+} ORDER BY DESC(?width) LIMIT 10
 ```
 
 **Guardrails at the end:** all passed
@@ -428,37 +450,30 @@ SELECT ?id ?name ?width_mm WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?supplier (MAX(?reliabilityIndex) AS ?maxReliability) WHERE {
-  ?product a pv:Hardware ; pv:name "Inductor" .
-  ?bom pv:hasPart [pv:part ?product] ;
-        pv:hasBomPart ?bomPart .
-  ?price pv:amount ?reliabilityIndex ;
-         pv:currency "EUR" .
-  ?supplier pv:id ?supplierID .
-} GROUP BY ?supplier ORDER BY DESC(?maxReliability) LIMIT 1
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?result WHERE {
+  {
+    SELECT (MAX(?reliability) AS ?maxReliability)
+    WHERE {
+      ?inductor a pv:Hardware ; 
+                pv:hasCategory prodi:prod-cat-Inductor ;
+                pv:reliabilityIndex ?reliability .
+    }
+  }
+  ?inductor a pv:Hardware ; 
+            pv:hasCategory prodi:prod-cat-Inductor ;
+            pv:reliabilityIndex ?reliability ;
+            pv:hasSupplier ?supplier .
+  FILTER(?reliability = ?maxReliability)
+  ?supplier pv:name ?result .
+} LIMIT 1
 ```
 
 **Guardrails at the end:** all passed
-**Repairs:** 0
-
-**Cause:** _________
-
-## ck25:47-en (F1 0.00)
-
-**Question:** From which countries are the BOM parts of our SkySync MechWave delivered?
-
-```sparql
-PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT DISTINCT ?country WHERE {
-  <http://ld.company.org/prod-instances/bom-17> pv:hasBomPart ?bomPart .
-  ?bomPart pv:hasProduct ?product .
-  ?product pv:hasSupplier ?supplier .
-  ?supplier pv:addressCountryCode ?country .
-}
-```
-
-**Guardrails at the end:** all passed
-**Repairs:** 0
+**Repairs:** 1
 
 **Cause:** _________
 
@@ -468,29 +483,19 @@ SELECT DISTINCT ?country WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT DISTINCT ?result WHERE {
-  ?agent a pv:Agent ; pv:areaOfExpertise <http://ld.company.org/prod-instances/prod-cat-Transistor> .
+  ?agent a pv:Agent ;
+           pv:areaOfExpertise prodi:prod-cat-Transistor .
+  BIND(?agent AS ?result)
 }
 ```
 
-**Guardrails at the end:** all passed
-**Repairs:** 0
-
-**Cause:** _________
-
-## ck25:50-en (F1 0.00)
-
-**Question:** Which department is resposible for the most product and how many product are this?
-
-```sparql
-PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT ?department (COUNT(?product) AS ?productsCount) WHERE {
-  ?product a pv:Product ; pv:responsibleFor ?department .
-} GROUP BY ?department ORDER BY DESC(?productsCount) LIMIT 1
-```
-
-**Guardrails at the end:** all passed
-**Repairs:** 0
+**Guardrails at the end:** G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties.
+**Repairs:** 2
 
 **Cause:** _________
 
@@ -500,15 +505,18 @@ SELECT ?department (COUNT(?product) AS ?productsCount) WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT DISTINCT ?result WHERE {
-  <http://ld.company.org/prod-instances/dept-41622> pv:hasManager ?manager .
-  ?manager a pv:Manager ;
-            pv:name ?result .
-}
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?result WHERE {
+  ?employee pv:memberOf prodi:dept-41622 ;
+            pv:hasManager ?manager .
+} LIMIT 1
 ```
 
 **Guardrails at the end:** all passed
-**Repairs:** 0
+**Repairs:** 1
 
 **Cause:** _________
 
@@ -518,9 +526,14 @@ SELECT DISTINCT ?result WHERE {
 
 ```sparql
 PREFIX pv: <http://ld.company.org/prod-vocab/>
-SELECT DISTINCT ?result WHERE {
-  <http://ld.company.org/prod-instances/hw-M558-2275045> pv:responsibleFor ?result .
-  ?result a pv:Department .
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?result WHERE {
+  prodi:hw-M558-2275045 pv:hasProductManager ?manager .
+  ?manager pv:memberOf ?department .
+  ?department a pv:Department ; pv:name ?result .
 }
 ```
 
@@ -534,9 +547,15 @@ SELECT DISTINCT ?result WHERE {
 **Question:** How many Sensor Switches do we offer?
 
 ```sparql
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX pv: <http://ld.company.org/prod-vocab/>
+PREFIX prodi: <http://ld.company.org/prod-instances/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 SELECT (COUNT(DISTINCT ?sensorSwitch) AS ?result) WHERE {
-  ?sensorSwitch a pv:Hardware ; pv:name "Sensor Switches" .
+  ?sensorSwitch a pv:Hardware ;
+                rdfs:label "Sensor Switches" .
 }
 ```
 

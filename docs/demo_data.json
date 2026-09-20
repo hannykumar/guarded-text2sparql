@@ -261,10 +261,11 @@
   {
    "id": "ck25:1-en",
    "question": "In which department is Ms. Brant?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  <http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org> pv:memberOf ?result .\n  ?result a pv:Department .\n}",
-   "f1": 1.0,
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  VALUES ?brant { prodi:empl-Karen.Brant%40company.org prodi:empl-Sylvester.Brant%40company.org }\n  ?brant pv:memberOf ?result .\n}",
+   "f1": 0.667,
    "rows": [
-    "Engineering"
+    "Engineering",
+    "Data Services"
    ],
    "repairs": 0,
    "checks": [
@@ -324,6 +325,72 @@
       "focus": false
      },
      {
+      "id": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "label": "Sylvester Brant",
+      "type": "pv:Employee",
+      "focus": true
+     },
+     {
+      "id": "Sylvester Brant",
+      "label": "Sylvester Brant",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Strain",
+      "label": "Strain",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Sensor",
+      "label": "Sensor",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Oscillator",
+      "label": "Oscillator",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Network",
+      "label": "Network",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/empl-Elena.Herzog%40company.org",
+      "label": "Elena Herzog",
+      "type": "pv:Manager",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/dept-41622",
+      "label": "Data Services",
+      "type": "pv:Department",
+      "focus": true
+     },
+     {
+      "id": "Holstenwall 310, 68139 Aue",
+      "label": "Holstenwall 310, 68139 Aue",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Sylvester.Brant@company.org",
+      "label": "Sylvester.Brant@company.org",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "(08514) 9139423",
+      "label": "(08514) 9139423",
+      "type": "value",
+      "focus": false
+     },
+     {
       "id": "Engineering",
       "label": "Engineering",
       "type": "value",
@@ -376,18 +443,6 @@
       "label": "D215-3449390 - Manual Inspection",
       "type": "pv:Service",
       "focus": false
-     },
-     {
-      "id": "http://ld.company.org/prod-instances/srv-I241-8776317",
-      "label": "I241-8776317 - Component Confabulation",
-      "type": "pv:Service",
-      "focus": false
-     },
-     {
-      "id": "73191",
-      "label": "73191",
-      "type": "value",
-      "focus": false
      }
     ],
     "edges": [
@@ -429,6 +484,61 @@
      {
       "from": "http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org",
       "to": "(00530) 5040048",
+      "label": "pv:phone"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "Sylvester Brant",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Strain",
+      "label": "pv:areaOfExpertise"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Sensor",
+      "label": "pv:areaOfExpertise"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Oscillator",
+      "label": "pv:areaOfExpertise"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Network",
+      "label": "pv:areaOfExpertise"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "http://ld.company.org/prod-instances/empl-Elena.Herzog%40company.org",
+      "label": "pv:hasManager"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "http://ld.company.org/prod-instances/dept-41622",
+      "label": "pv:memberOf"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "Holstenwall 310, 68139 Aue",
+      "label": "pv:addressText"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "Sylvester.Brant@company.org",
+      "label": "pv:email"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "Sylvester Brant",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org",
+      "to": "(08514) 9139423",
       "label": "pv:phone"
      },
      {
@@ -475,21 +585,6 @@
       "from": "http://ld.company.org/prod-instances/dept-73191",
       "to": "http://ld.company.org/prod-instances/srv-D215-3449390",
       "label": "pv:responsibleFor"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/dept-73191",
-      "to": "http://ld.company.org/prod-instances/srv-I241-8776317",
-      "label": "pv:responsibleFor"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/dept-73191",
-      "to": "73191",
-      "label": "pv:id"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/dept-73191",
-      "to": "Engineering",
-      "label": "pv:name"
      }
     ]
    }
@@ -497,7 +592,7 @@
   {
    "id": "ck25:2-en",
    "question": "What is the telephone of Baldwin Dirksen?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  <http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org> pv:phone ?result .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  prodi:empl-Baldwin.Dirksen%40company.org pv:phone ?result .\n}",
    "f1": 1.0,
    "rows": [
     "+49-6200-33069465"
@@ -607,7 +702,7 @@
   {
    "id": "ck25:3-en",
    "question": "Who is the manager of Heinrich Hoch?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  <http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org> pv:hasManager ?result .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  prodi:empl-Heinrich.Hoch%40company.org pv:hasManager ?result .\n}",
    "f1": 1.0,
    "rows": [
     "Waldtraud Kuttner"
@@ -793,30 +888,16 @@
   {
    "id": "ck25:4-en",
    "question": "What is the email of Sabrina from Marketing?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  ?employee a pv:Employee ; pv:name \"Sabrina\" ; pv:memberOf <http://ld.company.org/prod-instances/dept-85880> .\n  ?employee pv:email ?result .\n}",
-   "f1": 0.0,
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?employee a pv:Employee ;\n            pv:name ?name ;\n            pv:email ?result ;\n            pv:memberOf prodi:dept-85880 .\n  FILTER(?name = \"Sabrina Bayer\" || ?name = \"Sabrina Geiger\")\n} LIMIT 1",
+   "f1": 1.0,
    "rows": [
-    "(no results)"
+    "Sabrina.Geiger@company.org"
    ],
-   "repairs": 2,
+   "repairs": 0,
    "checks": [
     {
      "attempt": 0,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
+     "errors": []
     }
    ],
    "graph": {
@@ -967,7 +1048,7 @@
   {
    "id": "ck25:5-en",
    "question": "Who has expertise in Transistors?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  ?agent a pv:Agent ; pv:areaOfExpertise <http://ld.company.org/prod-instances/prod-cat-Transistor> .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  ?agent a pv:Agent ;\n           pv:areaOfExpertise prodi:prod-cat-Transistor .\n  BIND(?agent AS ?result)\n}",
    "f1": 0.0,
    "rows": [
     "(no results)"
@@ -1025,12 +1106,12 @@
   {
    "id": "ck25:7-en",
    "question": "Who is the manager of the Data Services department?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  <http://ld.company.org/prod-instances/dept-41622> pv:hasManager ?manager .\n  ?manager a pv:Manager ;\n            pv:name ?result .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?employee pv:memberOf prodi:dept-41622 ;\n            pv:hasManager ?manager .\n} LIMIT 1",
    "f1": 0.0,
    "rows": [
-    "(no results)"
+    ""
    ],
-   "repairs": 2,
+   "repairs": 1,
    "checks": [
     {
      "attempt": 0,
@@ -1040,15 +1121,7 @@
     },
     {
      "attempt": 1,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
+     "errors": []
     }
    ],
    "graph": {
@@ -1199,30 +1272,16 @@
   {
    "id": "ck25:8-en",
    "question": "Which department is responsible for the Sensor Switch M558-2275045?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  <http://ld.company.org/prod-instances/hw-M558-2275045> pv:responsibleFor ?result .\n  ?result a pv:Department .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  prodi:hw-M558-2275045 pv:hasProductManager ?manager .\n  ?manager pv:memberOf ?department .\n  ?department a pv:Department ; pv:name ?result .\n}",
    "f1": 0.0,
    "rows": [
-    "(no results)"
+    "Data Services"
    ],
-   "repairs": 2,
+   "repairs": 0,
    "checks": [
     {
      "attempt": 0,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 166), (line:4, col:3)"
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 166), (line:4, col:3)"
-     ]
+     "errors": []
     }
    ],
    "graph": {
@@ -1373,7 +1432,7 @@
   {
    "id": "ck25:9-en",
    "question": "How many Sensor Switches do we offer?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT (COUNT(DISTINCT ?sensorSwitch) AS ?result) WHERE {\n  ?sensorSwitch a pv:Hardware ; pv:name \"Sensor Switches\" .\n}",
+   "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT (COUNT(DISTINCT ?sensorSwitch) AS ?result) WHERE {\n  ?sensorSwitch a pv:Hardware ;\n                rdfs:label \"Sensor Switches\" .\n}",
    "f1": 0.0,
    "rows": [
     "0"
@@ -1393,30 +1452,17 @@
   {
    "id": "ck25:10-en",
    "question": "What is the name of the Network expert from the Marketing Department?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  ?networkExpert a pv:Hardware ; pv:name \"Network expert\" .\n  ?networkExpert pv:memberOf <http://ld.company.org/prod-instances/dept-85880> .\n  BIND(?networkExpert AS ?result)\n}",
-   "f1": 0.0,
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?employee a pv:Employee ;\n            pv:areaOfExpertise prodi:prod-cat-Network ;\n            pv:memberOf prodi:dept-85880 ;\n            pv:name ?result .\n}",
+   "f1": 1.0,
    "rows": [
-    "(no results)"
+    "Kevin Feigenbaum",
+    "Lambert Faust"
    ],
-   "repairs": 2,
+   "repairs": 0,
    "checks": [
     {
      "attempt": 0,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
+     "errors": []
     }
    ],
    "graph": {
@@ -1498,6 +1544,18 @@
       "label": "P516-8211068 - IoT Data Marketing",
       "type": "pv:Service",
       "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Network",
+      "label": "Network",
+      "type": "pv:ProductCategory",
+      "focus": true
+     },
+     {
+      "id": "Network",
+      "label": "Network",
+      "type": "value",
+      "focus": false
      }
     ],
     "edges": [
@@ -1560,6 +1618,16 @@
       "from": "http://ld.company.org/prod-instances/dept-85880",
       "to": "http://ld.company.org/prod-instances/srv-P516-8211068",
       "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Network",
+      "to": "Network",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Network",
+      "to": "Network",
+      "label": "pv:name"
      }
     ]
    }
@@ -1567,10 +1635,12 @@
   {
    "id": "ck25:11-en",
    "question": "Which departments have Transducer Experts?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?department WHERE {\n  ?employee a pv:Employee ; pv:areaOfExpertise <http://ld.company.org/prod-instances/hw-T341-6404509> .\n  ?manager a pv:Manager ; pv:hasDirectReport ?employee .\n  ?department a pv:Department ; pv:responsibleFor ?product .\n  ?product a pv:Product ; pv:hasProductManager ?manager ;\n    pv:compatibleProduct <http://ld.company.org/prod-instances/hw-T341-6404509> .\n}",
-   "f1": 0.0,
+   "query": "PREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?department WHERE {\n  VALUES ?product { \n    prodi:hw-T341-6404509\n    prodi:hw-E709-4829800\n    prodi:hw-M133-5945489\n  }\n  ?product pv:hasProductManager ?manager .\n  ?manager pv:memberOf ?department .\n}",
+   "f1": 0.8,
    "rows": [
-    "(no results)"
+    "Production",
+    "Marketing",
+    "Product Management"
    ],
    "repairs": 2,
    "checks": [
@@ -1588,13 +1658,143 @@
     },
     {
      "attempt": 2,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
+     "errors": []
     }
    ],
    "graph": {
     "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "label": "E709-4829800 - Transducer Warp",
+      "type": "pv:Hardware",
+      "focus": true
+     },
+     {
+      "id": "E709-4829800 - Transducer Warp",
+      "label": "E709-4829800 - Transducer Warp",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Transducer",
+      "label": "Transducer",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Warp",
+      "label": "Warp",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/empl-Henny.Foth%40company.org",
+      "label": "Henny Foth",
+      "type": "pv:Employee",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-7f0c3d05-f16c-44c0-b9f4-5ff9d2892270",
+      "label": "Brown, Torres and Bautista (Bangladesh)",
+      "type": "pv:Supplier",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/price-hw-E709-4829800-EUR",
+      "label": "4,51 EUR",
+      "type": "pv:Price",
+      "focus": false
+     },
+     {
+      "id": "13",
+      "label": "13",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "18",
+      "label": "18",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "E709-4829800",
+      "label": "E709-4829800",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Transducer Warp",
+      "label": "Transducer Warp",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "0.661",
+      "label": "0.661",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "label": "M133-5945489 - Transducer Warp",
+      "type": "pv:Hardware",
+      "focus": true
+     },
+     {
+      "id": "M133-5945489 - Transducer Warp",
+      "label": "M133-5945489 - Transducer Warp",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org",
+      "label": "Ratt Beyer",
+      "type": "pv:Employee",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-57f3326a-e53b-4cb6-9b32-658df4cc11a4",
+      "label": "Kerr LLC (Spain)",
+      "type": "pv:Supplier",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/price-hw-M133-5945489-EUR",
+      "label": "3,08 EUR",
+      "type": "pv:Price",
+      "focus": false
+     },
+     {
+      "id": "15",
+      "label": "15",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "72",
+      "label": "72",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "M133-5945489",
+      "label": "M133-5945489",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "8",
+      "label": "8",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "51",
+      "label": "51",
+      "type": "value",
+      "focus": false
+     },
      {
       "id": "http://ld.company.org/prod-instances/hw-T341-6404509",
       "label": "T341-6404509 - LCD Transducer Meter",
@@ -1620,61 +1820,145 @@
       "focus": false
      },
      {
-      "id": "http://ld.company.org/prod-instances/prod-cat-Transducer",
-      "label": "Transducer",
-      "type": "pv:ProductCategory",
-      "focus": false
+      "id": "http://ld.company.org/prod-instances/dept-66469",
+      "label": "Production",
+      "type": "pv:Department",
+      "focus": true
      },
      {
-      "id": "http://ld.company.org/prod-instances/prod-cat-LCD",
-      "label": "LCD",
-      "type": "pv:ProductCategory",
-      "focus": false
+      "id": "http://ld.company.org/prod-instances/dept-85880",
+      "label": "Marketing",
+      "type": "pv:Department",
+      "focus": true
      },
      {
-      "id": "http://ld.company.org/prod-instances/empl-Marius.Fux%40company.org",
-      "label": "Marius Fux",
-      "type": "pv:Employee",
-      "focus": false
-     },
-     {
-      "id": "http://ld.company.org/prod-instances/suppl-66cdfd7b-f68e-40d1-b9dc-0dd54c50b6a1",
-      "label": "Chavez-Price (Belgium)",
-      "type": "pv:Supplier",
-      "focus": false
-     },
-     {
-      "id": "http://ld.company.org/prod-instances/price-hw-T341-6404509-EUR",
-      "label": "0,39 EUR",
-      "type": "pv:Price",
-      "focus": false
-     },
-     {
-      "id": "20",
-      "label": "20",
-      "type": "value",
-      "focus": false
-     },
-     {
-      "id": "78",
-      "label": "78",
-      "type": "value",
-      "focus": false
-     },
-     {
-      "id": "T341-6404509",
-      "label": "T341-6404509",
-      "type": "value",
-      "focus": false
-     },
-     {
-      "id": "LCD Transducer Meter",
-      "label": "LCD Transducer Meter",
-      "type": "value",
-      "focus": false
+      "id": "http://ld.company.org/prod-instances/dept-22183",
+      "label": "Product Management",
+      "type": "pv:Department",
+      "focus": true
      }
     ],
     "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "E709-4829800 - Transducer Warp",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Transducer",
+      "label": "pv:hasCategory"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Warp",
+      "label": "pv:hasCategory"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "http://ld.company.org/prod-instances/empl-Henny.Foth%40company.org",
+      "label": "pv:hasProductManager"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "http://ld.company.org/prod-instances/suppl-7f0c3d05-f16c-44c0-b9f4-5ff9d2892270",
+      "label": "pv:hasSupplier"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "http://ld.company.org/prod-instances/price-hw-E709-4829800-EUR",
+      "label": "pv:price"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "13",
+      "label": "pv:depth_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "18",
+      "label": "pv:height_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "E709-4829800",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "Transducer Warp",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "0.661",
+      "label": "pv:reliabilityIndex"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-E709-4829800",
+      "to": "18",
+      "label": "pv:weight_g"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "M133-5945489 - Transducer Warp",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Transducer",
+      "label": "pv:hasCategory"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Warp",
+      "label": "pv:hasCategory"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org",
+      "label": "pv:hasProductManager"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "http://ld.company.org/prod-instances/suppl-57f3326a-e53b-4cb6-9b32-658df4cc11a4",
+      "label": "pv:hasSupplier"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "http://ld.company.org/prod-instances/price-hw-M133-5945489-EUR",
+      "label": "pv:price"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "15",
+      "label": "pv:depth_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "72",
+      "label": "pv:height_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "M133-5945489",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "Transducer Warp",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "8",
+      "label": "pv:weight_g"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-M133-5945489",
+      "to": "51",
+      "label": "pv:width_mm"
+     },
      {
       "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
       "to": "T341-6404509 - LCD Transducer Meter",
@@ -1694,46 +1978,6 @@
       "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
       "to": "http://ld.company.org/prod-instances/prod-cat-Transducer",
       "label": "pv:hasCategory"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
-      "to": "http://ld.company.org/prod-instances/prod-cat-LCD",
-      "label": "pv:hasCategory"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
-      "to": "http://ld.company.org/prod-instances/empl-Marius.Fux%40company.org",
-      "label": "pv:hasProductManager"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
-      "to": "http://ld.company.org/prod-instances/suppl-66cdfd7b-f68e-40d1-b9dc-0dd54c50b6a1",
-      "label": "pv:hasSupplier"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
-      "to": "http://ld.company.org/prod-instances/price-hw-T341-6404509-EUR",
-      "label": "pv:price"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
-      "to": "20",
-      "label": "pv:depth_mm"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
-      "to": "78",
-      "label": "pv:height_mm"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
-      "to": "T341-6404509",
-      "label": "pv:id"
-     },
-     {
-      "from": "http://ld.company.org/prod-instances/hw-T341-6404509",
-      "to": "LCD Transducer Meter",
-      "label": "pv:name"
      }
     ]
    }
@@ -1741,29 +1985,35 @@
   {
    "id": "ck25:13-en",
    "question": "How many suppliers do we have in France?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT (COUNT(DISTINCT ?supplier) AS ?result) WHERE {\n  ?supplier a pv:Supplier ; pv:country <http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7> .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT (COUNT(DISTINCT ?supplier) AS ?result) WHERE {\n  VALUES ?franceSupplier { prodi:suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7 prodi:suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6 prodi:suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09 }\n  ?supplier a pv:Supplier ;\n              pv:country \"France\" .\n  FILTER(?supplier = ?franceSupplier)\n}",
    "f1": 0.0,
    "rows": [
     "0"
    ],
-   "repairs": 0,
+   "repairs": 1,
    "checks": [
     {
      "attempt": 0,
+     "errors": [
+      "G5 entity: <http://ld.company.org/prod-instances/France> is not in the graph. Use only the IRIs given to you."
+     ]
+    },
+    {
+     "attempt": 1,
      "errors": []
     }
    ],
    "graph": {
     "nodes": [
      {
-      "id": "http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7",
-      "label": "Fletcher, Pierce and Navarro (France)",
+      "id": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "label": "Hill-Jones (France)",
       "type": "pv:Supplier",
       "focus": true
      },
      {
-      "id": "Fletcher, Pierce and Navarro (France)",
-      "label": "Fletcher, Pierce and Navarro (France)",
+      "id": "Hill-Jones (France)",
+      "label": "Hill-Jones (France)",
       "type": "value",
       "focus": false
      },
@@ -1782,6 +2032,90 @@
      {
       "id": "FR",
       "label": "FR",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Choisy-le-Roi",
+      "label": "Choisy-le-Roi",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "label": "092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Hill-Jones",
+      "label": "Hill-Jones",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "48.7630238",
+      "label": "48.7630238",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "2.4093664",
+      "label": "2.4093664",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "label": "Harris-Cunningham (France)",
+      "type": "pv:Supplier",
+      "focus": true
+     },
+     {
+      "id": "Harris-Cunningham (France)",
+      "label": "Harris-Cunningham (France)",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Toulouse",
+      "label": "Toulouse",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "label": "1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Harris-Cunningham",
+      "label": "Harris-Cunningham",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "43.6044622",
+      "label": "43.6044622",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "1.4442469",
+      "label": "1.4442469",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7",
+      "label": "Fletcher, Pierce and Navarro (France)",
+      "type": "pv:Supplier",
+      "focus": true
+     },
+     {
+      "id": "Fletcher, Pierce and Navarro (France)",
+      "label": "Fletcher, Pierce and Navarro (France)",
       "type": "value",
       "focus": false
      },
@@ -1817,6 +2151,96 @@
      }
     ],
     "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "Hill-Jones (France)",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "http://dbpedia.org/resource/France",
+      "label": "pv:country"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "France",
+      "label": "pv:addressCountry"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "FR",
+      "label": "pv:addressCountryCode"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "Choisy-le-Roi",
+      "label": "pv:addressLocality"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "Hill-Jones",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "48.7630238",
+      "label": "lat"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09",
+      "to": "2.4093664",
+      "label": "long"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "Harris-Cunningham (France)",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "http://dbpedia.org/resource/France",
+      "label": "pv:country"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "France",
+      "label": "pv:addressCountry"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "FR",
+      "label": "pv:addressCountryCode"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "Toulouse",
+      "label": "pv:addressLocality"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "Harris-Cunningham",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "43.6044622",
+      "label": "lat"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "1.4442469",
+      "label": "long"
+     },
      {
       "from": "http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7",
       "to": "Fletcher, Pierce and Navarro (France)",
@@ -1868,7 +2292,7 @@
   {
    "id": "ck25:14-en",
    "question": "Which supplier in France delivers Compensators?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?supplier WHERE {\n  ?product a pv:Hardware ; pv:name \"LCD Compensator\" .\n  ?bom pv:hasPart [ pv:part ?product ] ;\n        pv:hasSupplier ?supplier .\n  ?supplier pv:country \"France\" .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  ?product a pv:Hardware ; pv:hasCategory <http://ld.company.org/prod-instances/prod-cat-Compensator> ; pv:hasSupplier ?supplier .\n  ?supplier pv:country \"France\" .\n  ?supplier pv:name ?result .\n}",
    "f1": 0.0,
    "rows": [
     "(no results)"
@@ -1878,19 +2302,19 @@
     {
      "attempt": 0,
      "errors": [
-      "G4 vocabulary: pv:part does not exist. Did you mean pv:hasPart, pv:BomPart, pv:Product? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
+      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
      ]
     },
     {
      "attempt": 1,
      "errors": [
-      "G4 vocabulary: pv:part does not exist. Did you mean pv:hasPart, pv:BomPart, pv:Product? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
+      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
      ]
     },
     {
      "attempt": 2,
      "errors": [
-      "G4 vocabulary: pv:part does not exist. Did you mean pv:hasPart, pv:BomPart, pv:Product? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
+      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
      ]
     }
    ],
@@ -1902,10 +2326,10 @@
   {
    "id": "ck25:16-en",
    "question": "Do we have suppliers in Toulouse?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nASK {\n  ?supplier pv:country \"France\" ; pv:addressLocality \"Toulouse\".\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nASK {\n  ?supplier a pv:Supplier ;\n              pv:addressLocality \"Toulouse\" .\n}",
    "f1": 1.0,
    "rows": [
-    "False"
+    "True"
    ],
    "repairs": 0,
    "checks": [
@@ -1922,7 +2346,178 @@
   {
    "id": "ck25:17-en",
    "question": "Which suppliers do we have in Toulouse?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  ?supplier a pv:Supplier ; pv:addressLocality \"Toulouse\" .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  ?supplier a pv:Supplier ;\n              pv:addressLocality \"Toulouse\" .\n  BIND(?supplier AS ?result)\n}",
+   "f1": 1.0,
+   "rows": [
+    "Harris-Cunningham (France)"
+   ],
+   "repairs": 0,
+   "checks": [
+    {
+     "attempt": 0,
+     "errors": []
+    }
+   ],
+   "graph": {
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "label": "Harris-Cunningham (France)",
+      "type": "pv:Supplier",
+      "focus": true
+     },
+     {
+      "id": "Harris-Cunningham (France)",
+      "label": "Harris-Cunningham (France)",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://dbpedia.org/resource/France",
+      "label": "France",
+      "type": "",
+      "focus": false
+     },
+     {
+      "id": "France",
+      "label": "France",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "FR",
+      "label": "FR",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Toulouse",
+      "label": "Toulouse",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "label": "1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Harris-Cunningham",
+      "label": "Harris-Cunningham",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "43.6044622",
+      "label": "43.6044622",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "1.4442469",
+      "label": "1.4442469",
+      "type": "value",
+      "focus": false
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "Harris-Cunningham (France)",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "http://dbpedia.org/resource/France",
+      "label": "pv:country"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "France",
+      "label": "pv:addressCountry"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "FR",
+      "label": "pv:addressCountryCode"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "Toulouse",
+      "label": "pv:addressLocality"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "Harris-Cunningham",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "43.6044622",
+      "label": "lat"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6",
+      "to": "1.4442469",
+      "label": "long"
+     }
+    ]
+   }
+  },
+  {
+   "id": "ck25:18-en",
+   "question": "What is the cheapest Oscillator we have?",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?oscillator a pv:Hardware ;\n              pv:hasCategory prodi:prod-cat-Oscillator ;\n              pv:price ?price .\n  ?price pv:amount ?amount .\n} ORDER BY ?amount LIMIT 1",
+   "f1": 0.0,
+   "rows": [
+    ""
+   ],
+   "repairs": 0,
+   "checks": [
+    {
+     "attempt": 0,
+     "errors": []
+    }
+   ],
+   "graph": {
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Oscillator",
+      "label": "Oscillator",
+      "type": "pv:ProductCategory",
+      "focus": true
+     },
+     {
+      "id": "Oscillator",
+      "label": "Oscillator",
+      "type": "value",
+      "focus": false
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Oscillator",
+      "to": "Oscillator",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Oscillator",
+      "to": "Oscillator",
+      "label": "pv:name"
+     }
+    ]
+   }
+  },
+  {
+   "id": "ck25:19-en",
+   "question": "What is the most expensive service we offer?",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?service a pv:Service ;\n           pv:price ?price .\n  ?price pv:amount ?amount .\n} ORDER BY DESC(?amount) LIMIT 1",
    "f1": 0.0,
    "rows": [
     ""
@@ -1940,111 +2535,53 @@
    }
   },
   {
-   "id": "ck25:18-en",
-   "question": "What is the cheapest Oscillator we have?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?result WHERE {\n  ?oscillator a pv:Hardware ; pv:name \"Oscillator\" ;\n    pv:price [ pv:amount ?amount ; pv:currency \"EUR\" ] .\n  FILTER(?amount = (SELECT MIN(?amount) WHERE {\n    ?otherOscillator a pv:Hardware ; pv:name \"Oscillator\" ;\n      pv:price [ pv:amount ?amount ; pv:currency \"EUR\" ] .\n  }))\n}",
-   "f1": 0.0,
-   "rows": [
-    "error: Parse error: Encountered \" \"select\" \"SELECT \"\" at line 5, column 21."
-   ],
-   "repairs": 2,
-   "checks": [
-    {
-     "attempt": 0,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 182), (line:5, col:3)"
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 182), (line:5, col:3)"
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 182), (line:5, col:3)"
-     ]
-    }
-   ],
-   "graph": {
-    "nodes": [],
-    "edges": []
-   }
-  },
-  {
-   "id": "ck25:19-en",
-   "question": "What is the most expensive service we offer?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?result WHERE {\n  ?service a pv:Service ;\n           pv:price ?price .\n  ?price pv:amount ?amount ;\n          pv:currency ?currency .\n  FILTER(?amount = (SELECT MAX(?amount) WHERE { ?price2 pv:amount ?amount2 . }))\n}",
-   "f1": 0.0,
-   "rows": [
-    "error: Parse error: Encountered \" \"select\" \"SELECT \"\" at line 7, column 21."
-   ],
-   "repairs": 2,
-   "checks": [
-    {
-     "attempt": 0,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 190), (line:7, col:3)"
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 191), (line:7, col:3)"
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 191), (line:7, col:3)"
-     ]
-    }
-   ],
-   "graph": {
-    "nodes": [],
-    "edges": []
-   }
-  },
-  {
    "id": "ck25:21-en",
    "question": "What is the heaviest coil that does not exceed a base area of 15x15 milimeter?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?result WHERE {\n  ?result a pv:Hardware ;\n           pv:weight_g ?weight ;\n           pv:areaOfExpertise pv:prod-cat-Coil .\n  FILTER(?weight = (SELECT MAX(?w) FROM { ?part a pv:BomPart ; pv:hasProduct ?result ; pv:quantity ?q . BIND(?q * ?w AS ?w) }))\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?coil a pv:Hardware ;\n          pv:hasCategory prodi:prod-cat-Coil ;\n          pv:width_mm ?width ;\n          pv:depth_mm ?depth ;\n          pv:weight_g ?weight .\n  FILTER(?width * ?depth <= 15 * 15)\n} ORDER BY DESC(?weight) LIMIT 1",
    "f1": 0.0,
    "rows": [
-    "error: Parse error: Encountered \" \"select\" \"SELECT \"\" at line 6, column 21."
+    ""
    ],
-   "repairs": 2,
+   "repairs": 0,
    "checks": [
     {
      "attempt": 0,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 180), (line:6, col:3)"
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 180), (line:6, col:3)"
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 180), (line:6, col:3)"
-     ]
+     "errors": []
     }
    ],
    "graph": {
-    "nodes": [],
-    "edges": []
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Coil",
+      "label": "Coil",
+      "type": "pv:ProductCategory",
+      "focus": true
+     },
+     {
+      "id": "Coil",
+      "label": "Coil",
+      "type": "value",
+      "focus": false
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Coil",
+      "to": "Coil",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Coil",
+      "to": "Coil",
+      "label": "pv:name"
+     }
+    ]
    }
   },
   {
    "id": "ck25:23-en",
    "question": "What products can I get from US suppliers that are compatible with the U990 LCD Inductor?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?product WHERE {\n  ?supplier a pv:Supplier ; pv:country \"United States\" .\n  ?product pv:hasSupplier ?supplier ;\n           pv:compatibleProduct <http://ld.company.org/prod-instances/hw-U990-5234138> .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  ?product pv:hasSupplier ?supplier .\n  ?supplier pv:country \"US\" .\n  ?product pv:compatibleProduct prodi:hw-U990-5234138 .\n}",
    "f1": 0.0,
    "rows": [
     "(no results)"
@@ -2218,51 +2755,61 @@
   {
    "id": "ck25:24-en",
    "question": "What is the pontiometer with the smallest volume?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?result WHERE {\n  ?pontiometer a pv:Hardware ; pv:name \"pontiometer\" .\n  ?pontiometer pv:depth_mm ?depth ; pv:height_mm ?height ; pv:width_mm ?width .\n  BIND(?depth * ?height * ?width AS ?volume) .\n  ORDER BY ASC(?volume)\n  LIMIT 1\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?poti a pv:Hardware ;\n          pv:hasCategory prodi:prod-cat-Potentiometer ;\n          pv:depth_mm ?depth ;\n          pv:height_mm ?height ;\n          pv:width_mm ?width .\n  BIND(?depth * ?height * ?width AS ?volume)\n} ORDER BY ASC(?volume) LIMIT 1",
    "f1": 0.0,
    "rows": [
-    "error: Parse error: Encountered \" \"order\" \"ORDER \"\" at line 6, column 3."
+    ""
    ],
-   "repairs": 2,
+   "repairs": 0,
    "checks": [
     {
      "attempt": 0,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'ORDER'  (at char 263), (line:6, col:3)"
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 263), (line:6, col:3)"
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 263), (line:6, col:3)"
-     ]
+     "errors": []
     }
    ],
    "graph": {
-    "nodes": [],
-    "edges": []
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Potentiometer",
+      "label": "Potentiometer",
+      "type": "pv:ProductCategory",
+      "focus": true
+     },
+     {
+      "id": "Potentiometer",
+      "label": "Potentiometer",
+      "type": "value",
+      "focus": false
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Potentiometer",
+      "to": "Potentiometer",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Potentiometer",
+      "to": "Potentiometer",
+      "label": "pv:name"
+     }
+    ]
    }
   },
   {
    "id": "ck25:25-en",
    "question": "Which coil has the highest density?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT (MAX(?density) AS ?maxDensity) WHERE {\n  ?coil a pv:Hardware ; pv:weight_g ?weight ; pv:height_mm ?height .\n  BIND((?weight / (?height * ?height)) AS ?density)\n} ORDER BY DESC(?maxDensity) LIMIT 1",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?coil a pv:Hardware ; pv:hasCategory prodi:prod-cat-Coil ; pv:weight_g ?weight ; pv:depth_mm ?depth ; pv:height_mm ?height ; pv:width_mm ?width .\n  BIND(?weight / (?depth * ?height * ?width) AS ?density)\n} ORDER BY DESC(?density) LIMIT 1",
    "f1": 0.0,
    "rows": [
-    "0.138888888888888888888889"
+    ""
    ],
    "repairs": 1,
    "checks": [
     {
      "attempt": 0,
      "errors": [
-      "G6 execution: Parse error: Non-group key variable in SELECT: ?result"
+      "G4 vocabulary: pv:volume_mm3 does not exist. Did you mean pv:depth_mm, pv:height_mm, pv:width_mm? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
      ]
     },
     {
@@ -2271,14 +2818,38 @@
     }
    ],
    "graph": {
-    "nodes": [],
-    "edges": []
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Coil",
+      "label": "Coil",
+      "type": "pv:ProductCategory",
+      "focus": true
+     },
+     {
+      "id": "Coil",
+      "label": "Coil",
+      "type": "value",
+      "focus": false
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Coil",
+      "to": "Coil",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Coil",
+      "to": "Coil",
+      "label": "pv:name"
+     }
+    ]
    }
   },
   {
    "id": "ck25:27-en",
    "question": "Give me a phone directory of everyone on staff who does not manage anyone, I need name, email, and phone, sorted by name?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?name ?email ?phone WHERE {\n  ?employee a pv:Employee ;\n             pv:name ?name ;\n             pv:email ?email ;\n             pv:phone ?phone .\n  FILTER NOT EXISTS { ?manager a pv:Manager ; pv:hasDirectReport ?employee } .\n} ORDER BY ?name",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?email ?phone WHERE {\n  ?employee a pv:Employee .\n  FILTER NOT EXISTS { ?manager pv:hasDirectReport ?employee }\n  ?employee pv:name ?name ;\n            pv:email ?email ;\n            pv:phone ?phone .\n} ORDER BY ?name",
    "f1": 0.758,
    "rows": [
     "Adolfina Hoch \u00b7 Adolfina.Hoch@company.org \u00b7 +49-109-5719002",
@@ -2290,16 +2861,10 @@
     "Dieterich Blau \u00b7 Dieterich.Blau@company.org \u00b7 +49-2961-28181571",
     "Elisabeth Harman \u00b7 Elisabeth.Harman@company.org \u00b7 +49-4278-55203507"
    ],
-   "repairs": 1,
+   "repairs": 0,
    "checks": [
     {
      "attempt": 0,
-     "errors": [
-      "G2 syntax: Expected SelectQuery, found 'NOT'  (at char 214), (line:7, col:14)"
-     ]
-    },
-    {
-     "attempt": 1,
      "errors": []
     }
    ],
@@ -2311,33 +2876,7 @@
   {
    "id": "ck25:30-en",
    "question": "Which department have more than 5 employees? I need their names and the number of employees.",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?department (COUNT(?employee) AS ?numEmployees) WHERE {\n  ?department a pv:Department ;\n               pv:memberOf ?employee .\n} GROUP BY ?department HAVING (?numEmployees > 5)",
-   "f1": 0.0,
-   "rows": [
-    "(no results)"
-   ],
-   "repairs": 1,
-   "checks": [
-    {
-     "attempt": 0,
-     "errors": [
-      "G4 vocabulary: pv:hasEmployee does not exist. Did you mean pv:Employee, pv:hasSupplier, pv:hasCategory? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": []
-    }
-   ],
-   "graph": {
-    "nodes": [],
-    "edges": []
-   }
-  },
-  {
-   "id": "ck25:32-en",
-   "question": "For each supplier, what's the average price (in EUR) of what they sell, round reasonably?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?supplier (ROUND(AVG(?price)) AS ?averagePriceEUR) WHERE {\n  ?product a pv:Product ; pv:hasSupplier ?supplier .\n  ?price a pv:Price ; pv:currency \"EUR\" ; pv:amount ?amount .\n} GROUP BY ?supplier",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?result (COUNT(?employee) AS ?employees) WHERE {\n  ?department a pv:Department ;\n              pv:name ?result ;\n              pv:hasDirectReport ?employee .\n} GROUP BY ?result HAVING (?employees > 5)",
    "f1": 0.0,
    "rows": [
     "(no results)"
@@ -2355,12 +2894,385 @@
    }
   },
   {
+   "id": "ck25:32-en",
+   "question": "For each supplier, what's the average price (in EUR) of what they sell, round reasonably?",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?supplier (ROUND(AVG(?amount)) AS ?averagePrice) WHERE {\n  ?product pv:hasSupplier ?supplier .\n  ?product pv:price ?price .\n  ?price pv:currency \"EUR\" ;\n           pv:amount ?amount .\n} GROUP BY ?supplier",
+   "f1": 0.003,
+   "rows": [
+    "Drake Ltd (Honduras) \u00b7 4.0",
+    "Harris-Waller (Venezuela, Bolivarian Republic of) \u00b7 4.0",
+    "Anderson Ltd (United States) \u00b7 4.0",
+    "Buchanan Group (Korea, Republic of) \u00b7 3.0",
+    "Ford, Martinez and Gutierrez (India) \u00b7 2.0",
+    "Odom-Lawrence (India) \u00b7 3.0",
+    "Kerr LLC (Spain) \u00b7 3.0",
+    "Goodman-Chapman (United States) \u00b7 2.0"
+   ],
+   "repairs": 0,
+   "checks": [
+    {
+     "attempt": 0,
+     "errors": []
+    }
+   ],
+   "graph": {
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "label": "Drake Ltd (Honduras)",
+      "type": "pv:Supplier",
+      "focus": true
+     },
+     {
+      "id": "Drake Ltd (Honduras)",
+      "label": "Drake Ltd (Honduras)",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://dbpedia.org/resource/Honduras",
+      "label": "Honduras",
+      "type": "",
+      "focus": false
+     },
+     {
+      "id": "Honduras",
+      "label": "Honduras",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "HN",
+      "label": "HN",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "El Para\u00edso",
+      "label": "El Para\u00edso",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "label": "034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Drake Ltd",
+      "label": "Drake Ltd",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "13.9619941",
+      "label": "13.9619941",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "-86.56279208240295",
+      "label": "-86.56279208240295",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "label": "Harris-Waller (Venezuela, Bolivarian Republic of)",
+      "type": "pv:Supplier",
+      "focus": true
+     },
+     {
+      "id": "Harris-Waller (Venezuela, Bolivarian Republic of)",
+      "label": "Harris-Waller (Venezuela, Bolivarian Rep",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://dbpedia.org/resource/Venezuela",
+      "label": "Venezuela",
+      "type": "",
+      "focus": false
+     },
+     {
+      "id": "Venezuela, Bolivarian Republic of",
+      "label": "Venezuela, Bolivarian Republic of",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "VE",
+      "label": "VE",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Ciudad Bolivia",
+      "label": "Ciudad Bolivia",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "label": "9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Harris-Waller",
+      "label": "Harris-Waller",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "18.9132132",
+      "label": "18.9132132",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "-98.4149381",
+      "label": "-98.4149381",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "label": "Anderson Ltd (United States)",
+      "type": "pv:Supplier",
+      "focus": true
+     },
+     {
+      "id": "Anderson Ltd (United States)",
+      "label": "Anderson Ltd (United States)",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://dbpedia.org/resource/United_States",
+      "label": "United_States",
+      "type": "",
+      "focus": false
+     },
+     {
+      "id": "United States",
+      "label": "United States",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "US",
+      "label": "US",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Payson",
+      "label": "Payson",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "label": "816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Anderson Ltd",
+      "label": "Anderson Ltd",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "39.8169907",
+      "label": "39.8169907",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "-91.2423657",
+      "label": "-91.2423657",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-6746c17d-5e49-47bc-82a1-90ac0c7aa01c",
+      "label": "Buchanan Group (Korea, Republic of)",
+      "type": "pv:Supplier",
+      "focus": true
+     },
+     {
+      "id": "Buchanan Group (Korea, Republic of)",
+      "label": "Buchanan Group (Korea, Republic of)",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-b5028bba-a927-45d7-9032-ee90825311c5",
+      "label": "Ford, Martinez and Gutierrez (India)",
+      "type": "pv:Supplier",
+      "focus": true
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-8f607810-ca93-4274-9c27-d0a8dcba7c4a",
+      "label": "Odom-Lawrence (India)",
+      "type": "pv:Supplier",
+      "focus": true
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "Drake Ltd (Honduras)",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "http://dbpedia.org/resource/Honduras",
+      "label": "pv:country"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "Honduras",
+      "label": "pv:addressCountry"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "HN",
+      "label": "pv:addressCountryCode"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "El Para\u00edso",
+      "label": "pv:addressLocality"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "Drake Ltd",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "13.9619941",
+      "label": "lat"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5",
+      "to": "-86.56279208240295",
+      "label": "long"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "Harris-Waller (Venezuela, Bolivarian Republic of)",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "http://dbpedia.org/resource/Venezuela",
+      "label": "pv:country"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "Venezuela, Bolivarian Republic of",
+      "label": "pv:addressCountry"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "VE",
+      "label": "pv:addressCountryCode"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "Ciudad Bolivia",
+      "label": "pv:addressLocality"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "Harris-Waller",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "18.9132132",
+      "label": "lat"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14",
+      "to": "-98.4149381",
+      "label": "long"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "Anderson Ltd (United States)",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "http://dbpedia.org/resource/United_States",
+      "label": "pv:country"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "United States",
+      "label": "pv:addressCountry"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "US",
+      "label": "pv:addressCountryCode"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "Payson",
+      "label": "pv:addressLocality"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "Anderson Ltd",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "39.8169907",
+      "label": "lat"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389",
+      "to": "-91.2423657",
+      "label": "long"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/suppl-6746c17d-5e49-47bc-82a1-90ac0c7aa01c",
+      "to": "Buchanan Group (Korea, Republic of)",
+      "label": "label"
+     }
+    ]
+   }
+  },
+  {
    "id": "ck25:33-en",
    "question": "Are there departments with no manager assigned?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nASK {\n  ?department a pv:Department ;\n               pv:hasManager ?manager .\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nASK {\n  ?dept a pv:Department .\n  FILTER NOT EXISTS { ?dept pv:hasManager ?manager }\n}",
    "f1": 0.0,
    "rows": [
-    "False"
+    "True"
    ],
    "repairs": 0,
    "checks": [
@@ -2377,12 +3289,19 @@
   {
    "id": "ck25:34-en",
    "question": "I need to update my supplier rolodex, give me every supplier's name and all address details.",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?supplierName ?addressCountry ?addressLocality ?addressText WHERE {\n  ?supplier a pv:Supplier ;\n             pv:name ?supplierName ;\n             pv:addressCountryCode ?addressCountry ;\n             pv:addressLocality ?addressLocality ;\n             pv:addressText ?addressText .\n}",
-   "f1": 0.0,
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?supplierName ?addressCountry ?addressCountryCode ?addressLocality ?addressText WHERE {\n  ?supplier a pv:Supplier ;\n            pv:name ?supplierName .\n  OPTIONAL { ?supplier pv:addressCountry ?addressCountry . }\n  OPTIONAL { ?supplier pv:addressCountryCode ?addressCountryCode . }\n  OPTIONAL { ?supplier pv:addressLocality ?addressLocality . }\n  OPTIONAL { ?supplier pv:addressText ?addressText . }\n}",
+   "f1": 1.0,
    "rows": [
-    "(no results)"
+    "Davis-Wagner \u00b7 Spain \u00b7 ES \u00b7 Bormujos",
+    "Maxwell Inc \u00b7 India \u00b7 IN \u00b7 Naraini",
+    "White-Nash \u00b7 Pakistan \u00b7 PK \u00b7 Larkana",
+    "Smith-Cobb \u00b7 United States \u00b7 US \u00b7 Sikeston",
+    "Davis Ltd \u00b7 Belarus \u00b7 BY \u00b7 Pinsk",
+    "Swanson-Kennedy \u00b7 China \u00b7 CN \u00b7 Zhabei",
+    "Fernandez-Roberts \u00b7 United States \u00b7 US \u00b7 Harlingen",
+    "Jordan, James and Bradley \u00b7 France \u00b7 FR \u00b7 Saint-L\u00f4"
    ],
-   "repairs": 2,
+   "repairs": 1,
    "checks": [
     {
      "attempt": 0,
@@ -2392,15 +3311,7 @@
     },
     {
      "attempt": 1,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
+     "errors": []
     }
    ],
    "graph": {
@@ -2411,7 +3322,7 @@
   {
    "id": "ck25:36-en",
    "question": "Which area of expertise is most relevant among our products, what are the top three skills?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?areaOfExpertise (COUNT(?product) AS ?count) WHERE {\n  ?product a pv:Product ;\n            pv:hasCategory ?category ;\n            pv:hasProductManager ?manager .\n  ?manager pv:areaOfExpertise ?areaOfExpertise .\n} GROUP BY ?areaOfExpertise ORDER BY DESC(?count) LIMIT 3",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result (COUNT(?product) AS ?products) WHERE {\n  ?agent a pv:Employee ;\n           pv:areaOfExpertise ?result .\n  ?product a pv:Product ;\n             pv:hasCategory ?result .\n} GROUP BY ?result ORDER BY DESC(?products) LIMIT 3",
    "f1": 0.0,
    "rows": [
     "(no results)"
@@ -2431,7 +3342,7 @@
   {
    "id": "ck25:37-en",
    "question": "For each Bill of Material, how many parts does it contain and what is the total material quantity \u2014 show me only those BOMs exceeding 600 total items and order them descending.",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?bom (COUNT(?part) AS ?partCount) (SUM(?quantity) AS ?totalQuantity) WHERE {\n  ?bom a pv:BillOfMaterial ;\n        pv:hasBomPart ?part .\n  ?part pv:quantity ?quantity .\n} GROUP BY ?bom HAVING (?totalQuantity > 600) ORDER BY DESC(?totalQuantity)",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?bom (COUNT(?part) AS ?numParts) (SUM(?quantity) AS ?totalQuantity)\nWHERE {\n  ?bom a pv:BillOfMaterial ;\n         pv:hasBomPart ?bomPart .\n  ?bomPart pv:hasPart ?part ;\n           pv:quantity ?quantity .\n}\nGROUP BY ?bom\nHAVING (?totalQuantity > 600)\nORDER BY DESC(?totalQuantity)",
    "f1": 0.0,
    "rows": [
     "(no results)"
@@ -2451,46 +3362,386 @@
   {
    "id": "ck25:39-en",
    "question": "Which hardware items are wider than they are tall, and have a depth under 50 mm? List their dimensions.",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?hardware (pv:width_mm(?hardware) AS ?width) (pv:height_mm(?hardware) AS ?height) (pv:depth_mm(?hardware) AS ?depth) WHERE {\n  ?hardware a pv:Hardware ; pv:width_mm ?width ; pv:height_mm ?height ; pv:depth_mm ?depth .\n  FILTER (?width > ?height && ?depth < 50)\n}",
-   "f1": 0.0,
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result ?width ?height ?depth WHERE {\n  ?result a pv:Hardware ;\n            pv:width_mm ?width ;\n            pv:height_mm ?height ;\n            pv:depth_mm ?depth .\n  FILTER(?width > ?height && ?depth < 50)\n}",
+   "f1": 1.0,
    "rows": [
-    "error: Parse error: Variable used when already in-scope: ?width in ((<http://ld.company.org/prod-vocab/width_mm> ?hardware) AS ?width)"
+    "N560-4369045 - Resistor Compensator \u00b7 57 \u00b7 21 \u00b7 11",
+    "S418-2584457 - Bipolar-junction Dipole \u00b7 47 \u00b7 17 \u00b7 13",
+    "W986-7950553 - Field-effect Memristor Resonator Compensator \u00b7 45 \u00b7 13 \u00b7 20",
+    "H173-1200706 - Memristor Rheostat Transformer \u00b7 27 \u00b7 14 \u00b7 18",
+    "H642-6966395 - Polymer Strain Rheostat \u00b7 69 \u00b7 37 \u00b7 15",
+    "J986-8306638 - Phase Multiplexer Crystal Transducer \u00b7 39 \u00b7 15 \u00b7 20",
+    "M436-2993715 - LCD Resonator Compensator \u00b7 41 \u00b7 26 \u00b7 17",
+    "Q594-6895704 - LCD Network \u00b7 76 \u00b7 42 \u00b7 17"
    ],
-   "repairs": 2,
+   "repairs": 0,
    "checks": [
     {
      "attempt": 0,
-     "errors": [
-      "G6 execution: Parse error: Variable used when already in-scope: ?width in ((<http://ld.company.org/prod-vocab/width_mm> ?hardware) AS ?width)"
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G6 execution: Parse error: Variable used when already in-scope: ?width in ((<http://ld.company.org/prod-vocab/width_mm> ?hardware) AS ?width)"
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G6 execution: Parse error: Variable used when already in-scope: ?width in ((<http://ld.company.org/prod-vocab/width_mm> ?hardware) AS ?width)"
-     ]
+     "errors": []
     }
    ],
    "graph": {
-    "nodes": [],
-    "edges": []
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "label": "N560-4369045 - Resistor Compensator",
+      "type": "pv:Hardware",
+      "focus": true
+     },
+     {
+      "id": "N560-4369045 - Resistor Compensator",
+      "label": "N560-4369045 - Resistor Compensator",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-I965-1821441",
+      "label": "I965-1821441 - Multiplexer Resistor",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-Q951-7651773",
+      "label": "Q951-7651773 - Coil Compensator",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Compensator",
+      "label": "Compensator",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Resistor",
+      "label": "Resistor",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/empl-Herr.Burgh.Eichel%40company.org",
+      "label": "Herr Burgh Eichel",
+      "type": "pv:Employee",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-8943ee5e-5f73-4765-85cd-0c2c934f8877",
+      "label": "Smith-Cobb (United States)",
+      "type": "pv:Supplier",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/price-hw-N560-4369045-EUR",
+      "label": "2,61 EUR",
+      "type": "pv:Price",
+      "focus": false
+     },
+     {
+      "id": "11",
+      "label": "11",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "21",
+      "label": "21",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "N560-4369045",
+      "label": "N560-4369045",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Resistor Compensator",
+      "label": "Resistor Compensator",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "label": "S418-2584457 - Bipolar-junction Dipole",
+      "type": "pv:Hardware",
+      "focus": true
+     },
+     {
+      "id": "S418-2584457 - Bipolar-junction Dipole",
+      "label": "S418-2584457 - Bipolar-junction Dipole",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org",
+      "label": "Ratt Beyer",
+      "type": "pv:Employee",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/suppl-25e44a18-cb4f-48aa-bb6a-c05189268df6",
+      "label": "Coleman LLC (Brazil)",
+      "type": "pv:Supplier",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/price-hw-S418-2584457-EUR",
+      "label": "4,32 EUR",
+      "type": "pv:Price",
+      "focus": false
+     },
+     {
+      "id": "13",
+      "label": "13",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "17",
+      "label": "17",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "S418-2584457",
+      "label": "S418-2584457",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "Bipolar-junction Dipole",
+      "label": "Bipolar-junction Dipole",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "0.754",
+      "label": "0.754",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "16",
+      "label": "16",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "47",
+      "label": "47",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-W986-7950553",
+      "label": "W986-7950553 - Field-effect Memristor Resonator Compensator",
+      "type": "pv:Hardware",
+      "focus": true
+     },
+     {
+      "id": "W986-7950553 - Field-effect Memristor Resonator Compensator",
+      "label": "W986-7950553 - Field-effect Memristor Re",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-H664-9736043",
+      "label": "H664-9736043 - Log-periodic Potentiometer Resonator",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-H747-8053953",
+      "label": "H747-8053953 - Resonator Meter",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Resonator",
+      "label": "Resonator",
+      "type": "pv:ProductCategory",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-H173-1200706",
+      "label": "H173-1200706 - Memristor Rheostat Transformer",
+      "type": "pv:Hardware",
+      "focus": true
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-H642-6966395",
+      "label": "H642-6966395 - Polymer Strain Rheostat",
+      "type": "pv:Hardware",
+      "focus": true
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-J986-8306638",
+      "label": "J986-8306638 - Phase Multiplexer Crystal Transducer",
+      "type": "pv:Hardware",
+      "focus": true
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "N560-4369045 - Resistor Compensator",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "http://ld.company.org/prod-instances/hw-I965-1821441",
+      "label": "pv:compatibleProduct"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "http://ld.company.org/prod-instances/hw-Q951-7651773",
+      "label": "pv:compatibleProduct"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Compensator",
+      "label": "pv:hasCategory"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Resistor",
+      "label": "pv:hasCategory"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "http://ld.company.org/prod-instances/empl-Herr.Burgh.Eichel%40company.org",
+      "label": "pv:hasProductManager"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "http://ld.company.org/prod-instances/suppl-8943ee5e-5f73-4765-85cd-0c2c934f8877",
+      "label": "pv:hasSupplier"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "http://ld.company.org/prod-instances/price-hw-N560-4369045-EUR",
+      "label": "pv:price"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "11",
+      "label": "pv:depth_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "21",
+      "label": "pv:height_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "N560-4369045",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-N560-4369045",
+      "to": "Resistor Compensator",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "S418-2584457 - Bipolar-junction Dipole",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org",
+      "label": "pv:hasProductManager"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "http://ld.company.org/prod-instances/suppl-25e44a18-cb4f-48aa-bb6a-c05189268df6",
+      "label": "pv:hasSupplier"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "http://ld.company.org/prod-instances/price-hw-S418-2584457-EUR",
+      "label": "pv:price"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "13",
+      "label": "pv:depth_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "17",
+      "label": "pv:height_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "S418-2584457",
+      "label": "pv:id"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "Bipolar-junction Dipole",
+      "label": "pv:name"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "0.754",
+      "label": "pv:reliabilityIndex"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "16",
+      "label": "pv:weight_g"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-S418-2584457",
+      "to": "47",
+      "label": "pv:width_mm"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-W986-7950553",
+      "to": "W986-7950553 - Field-effect Memristor Resonator Compensator",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-W986-7950553",
+      "to": "http://ld.company.org/prod-instances/hw-H664-9736043",
+      "label": "pv:compatibleProduct"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-W986-7950553",
+      "to": "http://ld.company.org/prod-instances/hw-H747-8053953",
+      "label": "pv:compatibleProduct"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-W986-7950553",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Resonator",
+      "label": "pv:hasCategory"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/hw-W986-7950553",
+      "to": "http://ld.company.org/prod-instances/prod-cat-Compensator",
+      "label": "pv:hasCategory"
+     }
+    ]
    }
   },
   {
    "id": "ck25:40-en",
    "question": "Which hardware items - list id and name - have no active product manager?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?id ?name WHERE {\n  ?hw a pv:Hardware ;\n       pv:id ?id ;\n       pv:name ?name .\n  FILTER NOT EXISTS { ?hw pv:hasProductManager ?manager . }\n}",
-   "f1": 0.0,
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?id ?name WHERE {\n  ?hardware a pv:Hardware ;\n              pv:id ?id ;\n              pv:name ?name .\n  FILTER NOT EXISTS { [] pv:hasProductManager ?hardware }\n}",
+   "f1": 0.097,
    "rows": [
-    "(no results)"
+    "C247-3833661 \u00b7 Encoder Transformer",
+    "E355-4376121 \u00b7 Film Oscillator Dipole",
+    "G826-1197003 \u00b7 Heisenberg LCD Oscillator Breaker",
+    "N560-4369045 \u00b7 Resistor Compensator",
+    "P253-1288849 \u00b7 Dipole Compensator",
+    "R490-4226805 \u00b7 Coil Resonator LCD",
+    "R902-1645052 \u00b7 Film Network Gauge Compensator",
+    "S649-2935217 \u00b7 LCD Inductor Memristor"
    ],
-   "repairs": 2,
+   "repairs": 1,
    "checks": [
     {
      "attempt": 0,
@@ -2500,15 +3751,7 @@
     },
     {
      "attempt": 1,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."
-     ]
+     "errors": []
     }
    ],
    "graph": {
@@ -2519,15 +3762,21 @@
   {
    "id": "ck25:41-en",
    "question": "For each manager, what percentage of their entire team work in the same department as the manager?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?manager (COUNT(?employee) AS ?teamSize) WHERE {\n  ?manager a pv:Manager ;\n            pv:hasDirectReport ?employee .\n} GROUP BY ?manager",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?manager (COUNT(?sameDeptEmployee) AS ?sameDeptCount) (COUNT(?allReports) AS ?totalReports) \n       ((COUNT(?sameDeptEmployee) / COUNT(?allReports)) * 100 AS ?percentage)\nWHERE {\n  ?manager a pv:Manager ;\n             pv:hasDirectReport ?allReports .\n  OPTIONAL {\n    ?allReports pv:memberOf ?dept .\n    ?manager pv:memberOf ?dept .\n    FILTER(?allReports != ?manager)\n    BIND(?allReports AS ?sameDeptEmployee)\n  }\n}\nGROUP BY ?manager\nHAVING (COUNT(?allReports) > 0)",
    "f1": 0.0,
    "rows": [
     "(no results)"
    ],
-   "repairs": 0,
+   "repairs": 1,
    "checks": [
     {
      "attempt": 0,
+     "errors": [
+      "G2 syntax: Expected SelectQuery, found 'BIND'  (at char 585), (line:16, col:3)"
+     ]
+    },
+    {
+     "attempt": 1,
      "errors": []
     }
    ],
@@ -2539,7 +3788,7 @@
   {
    "id": "ck25:43-en",
    "question": "Show me any cycles of product compatibility \u2014 i.e. product A says it's compatible with B, and B says it's compatible with A (mutual pairs).",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?productA ?productB WHERE {\n  ?productA pv:compatibleProduct ?productB .\n  ?productB pv:compatibleProduct ?productA .\n  FILTER(?productA != ?productB)\n}",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?productA ?productB WHERE {\n  ?productA pv:compatibleProduct ?productB .\n  ?productB pv:compatibleProduct ?productA .\n  FILTER(?productA != ?productB)\n}",
    "f1": 1.0,
    "rows": [
     "Y728-2083256 - Gauge Crystal Encoder \u00b7 C247-3833661 - Encoder Transformer",
@@ -2840,7 +4089,7 @@
   {
    "id": "ck25:44-en",
    "question": "Which hardware items have dimensions in the top 10 % of all widths, and what are their IDs, names and widths?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?id ?name ?width_mm WHERE {\n  ?hw a pv:Hardware ; pv:id ?id ; pv:name ?name ; pv:width_mm ?width_mm .\n} ORDER BY DESC(?width_mm) LIMIT 10",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result ?id ?name ?width WHERE {\n  ?hardware a pv:Hardware ;\n              pv:id ?id ;\n              pv:name ?name ;\n              pv:width_mm ?width .\n} ORDER BY DESC(?width) LIMIT 10",
    "f1": 0.197,
    "rows": [
     "B523-5464510 \u00b7 Bipolar-junction Switch Transducer \u00b7 80",
@@ -2867,64 +4116,72 @@
   {
    "id": "ck25:45-en",
    "question": "Which supplier delivers the most reliable Inductor?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?supplier (MAX(?reliabilityIndex) AS ?maxReliability) WHERE {\n  ?product a pv:Hardware ; pv:name \"Inductor\" .\n  ?bom pv:hasPart [pv:part ?product] ;\n        pv:hasBomPart ?bomPart .\n  ?price pv:amount ?reliabilityIndex ;\n         pv:currency \"EUR\" .\n  ?supplier pv:id ?supplierID .\n} GROUP BY ?supplier ORDER BY DESC(?maxReliability) LIMIT 1",
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  {\n    SELECT (MAX(?reliability) AS ?maxReliability)\n    WHERE {\n      ?inductor a pv:Hardware ; \n                pv:hasCategory prodi:prod-cat-Inductor ;\n                pv:reliabilityIndex ?reliability .\n    }\n  }\n  ?inductor a pv:Hardware ; \n            pv:hasCategory prodi:prod-cat-Inductor ;\n            pv:reliabilityIndex ?reliability ;\n            pv:hasSupplier ?supplier .\n  FILTER(?reliability = ?maxReliability)\n  ?supplier pv:name ?result .\n} LIMIT 1",
    "f1": 0.0,
    "rows": [
-    "(no results)"
+    "Adkins, Lopez and Boyd"
    ],
-   "repairs": 2,
+   "repairs": 1,
    "checks": [
     {
      "attempt": 0,
      "errors": [
-      "G4 vocabulary: pv:part does not exist. Did you mean pv:hasPart, pv:BomPart, pv:Product? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
+      "G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 402), (line:11, col:3)"
      ]
     },
     {
      "attempt": 1,
-     "errors": [
-      "G4 vocabulary: pv:part does not exist. Did you mean pv:hasPart, pv:BomPart, pv:Product? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G4 vocabulary: pv:part does not exist. Did you mean pv:hasPart, pv:BomPart, pv:Product? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
-     ]
+     "errors": []
     }
    ],
    "graph": {
-    "nodes": [],
-    "edges": []
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/prod-cat-Inductor",
+      "label": "Inductor",
+      "type": "pv:ProductCategory",
+      "focus": true
+     },
+     {
+      "id": "Inductor",
+      "label": "Inductor",
+      "type": "value",
+      "focus": false
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Inductor",
+      "to": "Inductor",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/prod-cat-Inductor",
+      "to": "Inductor",
+      "label": "pv:name"
+     }
+    ]
    }
   },
   {
    "id": "ck25:47-en",
    "question": "From which countries are the BOM parts of our SkySync MechWave delivered?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT DISTINCT ?country WHERE {\n  <http://ld.company.org/prod-instances/bom-17> pv:hasBomPart ?bomPart .\n  ?bomPart pv:hasProduct ?product .\n  ?product pv:hasSupplier ?supplier .\n  ?supplier pv:addressCountryCode ?country .\n}",
-   "f1": 0.0,
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  prodi:bom-17 pv:hasBomPart ?bomPart .\n  ?bomPart pv:hasPart ?product .\n  ?product pv:hasSupplier ?supplier .\n  ?supplier pv:country ?result .\n}",
+   "f1": 1.0,
    "rows": [
-    "(no results)"
+    "http://dbpedia.org/resource/Belarus",
+    "http://dbpedia.org/resource/Germany",
+    "http://dbpedia.org/resource/Vietnam",
+    "http://dbpedia.org/resource/Tanzania",
+    "http://dbpedia.org/resource/Finland",
+    "http://dbpedia.org/resource/Slovakia",
+    "http://dbpedia.org/resource/Kingdom_of_the_Netherlands"
    ],
-   "repairs": 2,
+   "repairs": 0,
    "checks": [
     {
      "attempt": 0,
-     "errors": [
-      "G4 vocabulary: pv:hasProduct does not exist. Did you mean pv:Product, pv:hasProductManager, pv:hasPart? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
-     ]
-    },
-    {
-     "attempt": 1,
-     "errors": [
-      "G4 vocabulary: pv:hasProduct does not exist. Did you mean pv:Product, pv:hasProductManager, pv:hasPart? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
-     ]
-    },
-    {
-     "attempt": 2,
-     "errors": [
-      "G4 vocabulary: pv:hasProduct does not exist. Did you mean pv:Product, pv:hasProductManager, pv:hasPart? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:price, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."
-     ]
+     "errors": []
     }
    ],
    "graph": {
@@ -3047,25 +4304,209 @@
   {
    "id": "ck25:50-en",
    "question": "Which department is resposible for the most product and how many product are this?",
-   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?department (COUNT(?product) AS ?productsCount) WHERE {\n  ?product a pv:Product ; pv:responsibleFor ?department .\n} GROUP BY ?department ORDER BY DESC(?productsCount) LIMIT 1",
-   "f1": 0.0,
+   "query": "PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?department (COUNT(?product) AS ?products) WHERE {\n  ?department a pv:Department ;\n              pv:responsibleFor ?product .\n} GROUP BY ?department ORDER BY DESC(?products) LIMIT 1",
+   "f1": 1.0,
    "rows": [
-    "(no results)"
+    "Product Management \u00b7 12"
    ],
-   "repairs": 0,
+   "repairs": 1,
    "checks": [
     {
      "attempt": 0,
+     "errors": [
+      "G6 execution: Parse error: Non-group key variable in SELECT: ?result"
+     ]
+    },
+    {
+     "attempt": 1,
      "errors": []
     }
    ],
    "graph": {
-    "nodes": [],
-    "edges": []
+    "nodes": [
+     {
+      "id": "http://ld.company.org/prod-instances/dept-22183",
+      "label": "Product Management",
+      "type": "pv:Department",
+      "focus": true
+     },
+     {
+      "id": "Product Management",
+      "label": "Product Management",
+      "type": "value",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-L128-5499058",
+      "label": "L128-5499058 - Field-effect Multiplexer Potentiometer",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-L536-5185541",
+      "label": "L536-5185541 - Coil Gauge",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-A688-6056899",
+      "label": "A688-6056899 - Multiplexer Inductor",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-G144-5498082",
+      "label": "G144-5498082 - Multiplexer Transistor Transformer",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-H274-5987347",
+      "label": "H274-5987347 - Driver Resonator",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-I980-1040313",
+      "label": "I980-1040313 - Film Resonator Capacitor Strain",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-L316-4863597",
+      "label": "L316-4863597 - Potentiometer Inductor",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-O857-5463957",
+      "label": "O857-5463957 - Transistor Compensator",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-Q774-7287508",
+      "label": "Q774-7287508 - Flow Potentiometer Crystal Rheostat",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-T291-4144066",
+      "label": "T291-4144066 - LCD Gauge Warp",
+      "type": "pv:Hardware",
+      "focus": false
+     },
+     {
+      "id": "http://ld.company.org/prod-instances/hw-U836-7709298",
+      "label": "U836-7709298 - Driver Switch Transducer",
+      "type": "pv:Hardware",
+      "focus": false
+     }
+    ],
+    "edges": [
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "Product Management",
+      "label": "label"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-L128-5499058",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-L536-5185541",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-A688-6056899",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-G144-5498082",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-H274-5987347",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-I980-1040313",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-L316-4863597",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-O857-5463957",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-Q774-7287508",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-T291-4144066",
+      "label": "pv:responsibleFor"
+     },
+     {
+      "from": "http://ld.company.org/prod-instances/dept-22183",
+      "to": "http://ld.company.org/prod-instances/hw-U836-7709298",
+      "label": "pv:responsibleFor"
+     }
+    ]
    }
   }
  ],
  "scores": [
+  {
+   "id": "A0",
+   "title": "The model on its own",
+   "blurb": "No help at all: just the question.",
+   "f1": 0.029,
+   "exact": 1,
+   "partial": 0,
+   "total": 35
+  },
+  {
+   "id": "A1",
+   "title": "Told what exists",
+   "blurb": "Given the list of things and relationships in the graph.",
+   "f1": 0.199,
+   "exact": 6,
+   "partial": 3,
+   "total": 35
+  },
+  {
+   "id": "A2",
+   "title": "Given the real IDs",
+   "blurb": "Names in the question are looked up and resolved to real IDs.",
+   "f1": 0.304,
+   "exact": 9,
+   "partial": 4,
+   "total": 35
+  },
+  {
+   "id": "A3",
+   "title": "Checked before answering",
+   "blurb": "Eight checks on the query, with up to two retries.",
+   "f1": 0.386,
+   "exact": 11,
+   "partial": 6,
+   "total": 35
+  }
+ ],
+ "scores_small": [
   {
    "id": "A0",
    "title": "The model on its own",

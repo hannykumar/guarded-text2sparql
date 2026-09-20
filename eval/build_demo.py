@@ -146,7 +146,7 @@ def our_result(query: str) -> tuple[list[str], list[str]]:
     return rows or ["(no results)"], iris
 
 
-def ablation() -> list[dict]:
+def ablation(root: str = "results") -> list[dict]:
     """Each configuration's score on the held-back questions, in words as well as numbers."""
     described = [
         ("A0", "The model on its own", "No help at all: just the question."),
@@ -156,7 +156,7 @@ def ablation() -> list[dict]:
     ]
     out = []
     for name, title, blurb in described:
-        path = Path(f"results/{name}/test/run1/metrics.json")
+        path = Path(f"{root}/{name}/test/run1/metrics.json")
         if not path.exists():
             continue
         metrics = json.loads(path.read_text())
@@ -215,6 +215,7 @@ def main() -> int:
                 "schema": schema(),
                 "questions": questions,
                 "scores": ablation(),
+                "scores_small": ablation("results-7b"),
             },
             indent=1,
         )

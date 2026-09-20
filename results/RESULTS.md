@@ -11,10 +11,10 @@ The 15 questions used while building the system.
 
 | Config | What it adds | F1 | Precision | Recall | Exact | Runs |
 |---|---|---|---|---|---|---|
-| A0 | LLM only | 0.067 | 0.067 | 0.067 | 1.0/15 | 3 |
-| A1 | + schema card | 0.134 | 0.145 | 0.126 | 1.0/15 | 3 |
-| A2 | + entity linking | 0.149 | 0.150 | 0.148 | 2.0/15 | 3 |
-| A3 | + guardrails and repair | 0.149 | 0.150 | 0.148 | 2.0/15 | 3 |
+| A0 | LLM only | 0.067 | 0.067 | 0.067 | 1.0/15 | 1 |
+| A1 | + schema card | 0.239 | 0.250 | 0.230 | 2.0/15 | 1 |
+| A2 | + entity linking | 0.234 | 0.245 | 0.226 | 2.0/15 | 1 |
+| A3 | + guardrails and repair | 0.234 | 0.245 | 0.226 | 2.0/15 | 1 |
 
 ### test
 
@@ -22,10 +22,10 @@ The 35 questions held back until the design was frozen. **These are the honest n
 
 | Config | What it adds | F1 | Precision | Recall | Exact | Runs |
 |---|---|---|---|---|---|---|
-| A0 | LLM only | 0.029 | 0.029 | 0.029 | 1.0/35 | 3 |
-| A1 | + schema card | 0.084 | 0.114 | 0.078 | 2.0/35 | 3 |
-| A2 | + entity linking | 0.170 | 0.200 | 0.163 | 5.0/35 | 3 |
-| A3 | + guardrails and repair | 0.170 | 0.200 | 0.163 | 5.0/35 | 3 |
+| A0 | LLM only | 0.029 | 0.029 | 0.029 | 1.0/35 | 1 |
+| A1 | + schema card | 0.199 | 0.219 | 0.192 | 6.0/35 | 1 |
+| A2 | + entity linking | 0.304 | 0.329 | 0.306 | 9.0/35 | 1 |
+| A3 | + guardrails and repair | 0.386 | 0.406 | 0.411 | 11.0/35 | 1 |
 
 ### ck26
 
@@ -33,7 +33,7 @@ CK26: the same graph with the questions reworded (49 of 50 reference queries are
 
 | Config | What it adds | F1 | Precision | Recall | Exact | Runs |
 |---|---|---|---|---|---|---|
-| A3 | + guardrails and repair | 0.212 | 0.240 | 0.203 | 8.0/50 | 1 |
+| A3 | + guardrails and repair | 0.298 | 0.301 | 0.311 | 12.0/50 | 1 |
 
 ## Guardrail diagnostics
 
@@ -41,12 +41,12 @@ From the pipeline's own traces, not from the reference answers.
 
 | Config | Questions | Clean first try | Needed repair | Repair worked | Pass at end | G1 blocks | p50 s | p95 s |
 |---|---|---|---|---|---|---|---|---|
-| A0 | 150 | 0 | 0 | 0 | 0 | 0 | 1.5 | 1.9 |
-| A1 | 150 | 0 | 0 | 0 | 0 | 0 | 1.0 | 1.4 |
-| A2 | 150 | 0 | 0 | 0 | 0 | 0 | 2.0 | 2.5 |
-| A3 | 265 | 109 | 156 | 29 (19%) | 138 | 0 | 4.2 | 7.8 |
+| A0 | 50 | 0 | 0 | 0 | 0 | 0 | 5.0 | 7.6 |
+| A1 | 50 | 0 | 0 | 0 | 0 | 0 | 5.5 | 7.6 |
+| A2 | 50 | 0 | 0 | 0 | 0 | 0 | 8.3 | 10.8 |
+| A3 | 150 | 91 | 59 | 22 (37%) | 113 | 0 | 9.9 | 28.4 |
 
-First guardrail to fire, per config: `{"A0": {}, "A1": {}, "A2": {}, "A3": {"G7 plausibility": 67, "G4 vocabulary": 41, "G2 syntax": 32, "G6 execution": 11, "G5 entity": 6}}`
+First guardrail to fire, per config: `{"A0": {}, "A1": {}, "A2": {}, "A3": {"G7 plausibility": 38, "G2 syntax": 7, "G5 entity": 5, "G6 execution": 5, "G4 vocabulary": 4}}`
 
 
 ## How to read this

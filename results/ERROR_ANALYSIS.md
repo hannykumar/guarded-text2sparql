@@ -1,56 +1,76 @@
-# Error analysis: A3 on the 35 held-back questions
+# Error analysis
 
-30 of 35 questions scored below 1.0. Each was labelled by hand against the ontology's
-real domains and ranges. Run: `results/A3/test/run1`, `qwen2.5-coder:7b` on an A40.
+Two models, same code, same questions: `qwen2.5-coder:32b` (the headline system) and
+`qwen2.5-coder:7b` (the first round, kept in `results-7b/`). Both on one A40.
 
-## What the guardrails could still say about the final query
+## Held-back test set, 35 questions
 
-| Final state | Questions | Meaning |
+| | 32B | 7B |
 |---|---|---|
-| Valid, executed, non-empty, still wrong | 13 | The guardrails cannot see this. Only the reference answer can |
-| Empty result (G7) | 8 | Flagged as suspicious; one repair attempted and failed |
-| Unparseable (G2) | 5 | Two repairs failed; returned as best effort |
-| Invented vocabulary (G4) | 3 | Two repairs failed; the model would not let go of the name |
-| Execution error (G6) | 1 | |
+| Fully correct | **11** | 5 |
+| Partly correct | 6 | 2 |
+| Wrong | 18 | 28 |
+| F1 | **0.386** | 0.170 |
 
-So for **21 of 30 failures the system knew something was wrong**, and for 13 it had no
-way to know. That distinction is the point of the guardrails: they convert silent
-nonsense into either a valid query or a reported problem.
+## What the guardrails could still say about a failing query
 
-## Cause of failure
-
-| Cause | Count | Example |
+| Final state of the query | 32B | 7B |
 |---|---|---|
-| **Wrong entity** (a literal where an IRI belongs, or the wrong IRI) | 6 | `?s pv:country "France"` instead of the `Country` IRI; counting `pv:name "Sensor Switches"` when no such literal exists |
-| **Wrong property or class** | 6 | "Network expert" modelled as `pv:Hardware ; pv:name "Network expert"` instead of an `Employee` with `pv:areaOfExpertise` |
-| **Aggregation or subquery misuse** | 5 | `AVG(?price)` over prices never joined to the supplier's products |
-| **Wrong direction** | 4 | `?department pv:memberOf ?employee`; the property runs `Agent -> Department` |
-| **Wrong answer shape** | 4 | `SELECT ?result` while the pattern binds `?supplier`, so the answer is always empty; an ASK that tests the opposite of the question |
-| **Unparseable after two repairs** | 3 | `pv:width_mm(?hardware)`, calling a property as a function |
-| **Wrong ORDER BY / LIMIT** | 1 | "top 10 % of widths" became `LIMIT 10` |
-| **Missing inference** | 1 | `?agent a pv:Agent` returns nothing: instances are typed `Employee`, and the store does no RDFS reasoning |
+| Valid, ran, returned something, still wrong | 21 | 13 |
+| Empty result, flagged by G7 | 3 | 8 |
+| Unparseable after two repairs | **0** | 5 |
+| Invented vocabulary after two repairs | **0** | 3 |
+| Execution error | **0** | 1 |
 
-## What this says
+**With the 32B, every mechanical failure is gone.** Nothing returned is unparseable, uses
+a name that does not exist, or fails to run. All 24 remaining failures are the system
+answering a different question from the one that was asked. That is the clearest single
+statement of what the guardrails buy: they eliminate the class of error that code can
+detect, and they leave the class that needs understanding.
 
-**Entity linking solved the problem it was built for, and exposed the next one.** Where
-a question names a person or product, the linker resolves it. But the model still writes
-`pv:country "France"` for a country that is an IRI, and no linker was asked to cover
-countries and categories. Extending the label index to every typed resource, not only
-the ones a mention refers to, is the obvious next step.
+## What the repair loop did
 
-**Direction is the model's most systematic mistake.** Four questions used a property
-backwards, and the schema card already states every domain and range. A guardrail could
-check each triple pattern against them and say "`pv:memberOf` runs Agent to Department,
-you have it reversed". That is a deterministic check the code can do and the model
-repeatedly cannot, and it is the single most promising addition to G1-G8.
+| | 32B | 7B |
+|---|---|---|
+| Questions needing at least one repair | 59 of 150 | 156 of 265 |
+| Repairs that fixed the reported problem | **24 (41%)** | 29 (19%) |
+| Queries passing every check at the end | 113 | 138 of 265 |
 
-**Four failures were empty answers caused by a variable that is never bound.** A query
-selecting `?result` while binding `?supplier` is valid SPARQL, runs fine, and returns
-nothing. G7 flags the empty result, but the message says "check the entity IRIs"; it
-could instead say "the projected variable ?result appears nowhere in the pattern", which
-is again a purely deterministic observation.
+**Repairs work twice as often with the bigger model**, and this is why the guardrails
+finally move the score. A repair is a conversation: the guardrail says exactly what is
+wrong, and the model has to act on it. Told `pv:hasProduct does not exist, here are the
+properties that do`, the 7B mostly repeated itself; the 32B rewrites the query.
 
-**One failure is a modelling mismatch, not a model error.** `?agent a pv:Agent` is
-correct RDFS reasoning: `Employee` is a subclass of `Agent`. The store does no
-inference, so it returns nothing. Either the store should materialise the hierarchy or
-the schema card should say that subclass links are not expanded.
+This is the project's most useful finding, and it inverts the conclusion from the first
+round. On the 7B, guardrails cost two extra model calls and changed F1 by nothing
+(0.170 to 0.170). On the 32B they take 0.304 to **0.386** and add two fully correct
+answers. **Guardrails are not a fix for a weak model; they are a multiplier on a model
+good enough to use feedback.**
+
+## Why the remaining 24 still fail
+
+Labelled by hand against the ontology's real domains and ranges. The pattern that
+dominated the 7B's failures (inventing names, wrong direction) has largely gone; what
+is left is harder.
+
+| Cause | Roughly | Example |
+|---|---|---|
+| Compound questions assembled wrongly | 9 | "average price per supplier, rounded" needs join, filter, group, average, round — one wrong link and the answer set is wrong |
+| Wrong entity where a literal was used | 5 | `pv:country "France"` where the graph holds a country IRI. The linker resolves people and products but was never extended to countries and categories |
+| Answer shape | 4 | Returning a name where the reference returns the thing itself, or extra columns |
+| Aggregation subtleties | 3 | "top 10 % of widths" became `LIMIT 10` |
+| Wrong property or direction | 2 | Down from 4 on the 7B |
+| Missing inference | 1 | `?x a pv:Agent` returns nothing: instances are typed `Employee` and the store does no RDFS reasoning |
+
+## What to do next, in order of expected value
+
+1. **Extend entity linking beyond people and products** to countries, categories and
+   other typed resources. Five failures are literal-versus-IRI mistakes, and the
+   machinery already exists.
+2. **A domain/range direction guardrail.** The schema card already knows
+   `pv:memberOf` runs Agent to Department; the checker could reject the reverse and say so.
+3. **A projection check.** A query selecting `?result` while binding only `?supplier`
+   is valid SPARQL that always returns nothing. G7 notices the empty result but blames
+   the entity IRIs; it could name the real cause.
+4. **Materialise the class hierarchy** in the store, or state in the schema card that
+   subclass links are not expanded.

@@ -96,60 +96,53 @@ run. Rebuild it from the saved results with `make demo`.
 
 ## Results
 
-`qwen2.5-coder:7b` on one A40, temperature 0, three runs per configuration.
-Full tables in [results/RESULTS.md](results/RESULTS.md), environment in
-[results/ENVIRONMENT.md](results/ENVIRONMENT.md).
+Two models, identical code, temperature 0, one A40. Full tables in
+[results/RESULTS.md](results/RESULTS.md), setup in
+[results/ENVIRONMENT.md](results/ENVIRONMENT.md), failures in
+[results/ERROR_ANALYSIS.md](results/ERROR_ANALYSIS.md).
 
-**The 35 held-back test questions**, run once after the design was frozen:
+**The 35 held-back test questions**, run after the design was frozen:
 
-| Config | What it adds | F1 | Exact |
-|---|---|---|---|
-| A0 | LLM only | 0.029 | 1/35 |
-| A1 | + schema card | 0.084 | 2/35 |
-| A2 | + entity linking | **0.170** | 5/35 |
-| A3 | + guardrails and repair | 0.170 | 5/35 |
+| Config | What it adds | 32B F1 | 32B exact | 7B F1 | 7B exact |
+|---|---|---|---|---|---|
+| A0 | LLM only | 0.029 | 1/35 | 0.029 | 1/35 |
+| A1 | + schema card | 0.199 | 6/35 | 0.084 | 2/35 |
+| A2 | + entity linking | 0.304 | 9/35 | 0.170 | 5/35 |
+| A3 | + guardrails and repair | **0.386** | **11/35** | 0.170 | 5/35 |
 
-The three runs of each configuration are bit-identical, so the range is zero.
+**Being told what exists, and given real IRIs, is worth more than model size.** A0 is
+identical for both models: 1 question of 35. A model four and a half times larger gains
+nothing at all without the schema card and the entity linker, because
+`empl-Karen.Brant%40company.org` is not guessable at any scale.
 
-**What each part is worth.** Telling the model what exists nearly triples F1 (A0 → A1).
-Resolving names to real IRIs doubles it again (A1 → A2) — unsurprising once you see that
-`empl-Karen.Brant%40company.org` is unguessable. Together they take the system from
-0.029 to 0.170, a roughly six-fold improvement over the bare model.
+**Guardrails are a multiplier on a capable model, not a crutch for a weak one.** This
+inverts the conclusion from the first round and is the most useful thing the project
+found. On the 7B, guardrails moved F1 not at all (0.170 to 0.170): repairs fired
+constantly and fixed the reported problem 19% of the time, mostly turning a broken query
+into a valid wrong one. On the 32B the same guardrails take 0.304 to **0.386**, and
+repairs succeed 41% of the time. A repair is a conversation, and it only pays off with a
+model able to act on precise feedback.
 
-**The guardrails change what is returned, not how often it is right.** A3 scores exactly
-what A2 scores. This is the project's most interesting result and it is worth stating
-plainly rather than burying: repairs fire on 156 of 265 questions and fix the reported
-problem in 19% of them, but fixing a broken query usually turns it into a *valid* wrong
-query, not a right one. A wrong answer expressed in correct SPARQL scores no better.
+**What the guardrails guarantee regardless of model.** Every returned query is read-only
+and uses vocabulary and IRIs that exist, or is reported as failing. With the 32B this is
+visible in the failures: of 24 wrong answers, **zero** are unparseable, use invented
+names, or fail to execute. Every mechanical error class is gone; what remains is the
+system answering a different question from the one asked. For output destined to run
+against a corporate knowledge graph, that property is worth having on its own.
 
-What the guardrails do buy is a different property, one F1 cannot show:
+**Context.** The KIT paper reports median F1 between 0.19 and 0.37 for schema-informed
+prompting on CK25 with large models, and no valid queries at all without schema. At
+0.386 the full system sits at the top of that band.
 
-- Every returned query is read-only. No update form or federated `SERVICE` call can leave
-  the system, and that is enforced by code rather than by asking the model nicely.
-- Every returned query uses vocabulary and entity IRIs that exist, or is reported as
-  failing. Of 30 test failures, the system **knew** something was wrong in 21 of them;
-  only 13 were valid, executable queries that were simply wrong about the world.
-- Nothing is ever executed by the model, and nothing the model claims about its own
-  output is trusted.
-
-For a system whose output would be run against a corporate knowledge graph, "never emits
-a write query and never invents an IRI" is worth having even at identical F1. The
-[error analysis](results/ERROR_ANALYSIS.md) breaks down all 30 failures by cause and
-names the next guardrail worth building: a domain/range direction check, which alone
-would address 4 of them.
-
-**Paraphrase robustness.** On CK26, the same graph with reworded questions, A3 scores
-0.212 (8/50) — no collapse from rewording, though this is not a held-out set: 49 of its
-50 reference queries are identical to CK25's.
-
-**Context.** The KIT paper on CK25 reports median F1 between 0.19 and 0.37 for
-schema-informed prompting with much larger models, and no valid queries at all without
-schema. A 7B model reaching 0.170 on the held-back split sits just below that band,
-which is about where it should be.
+**Paraphrase robustness.** On CK26, the same graph with reworded questions, the 32B
+scores 0.298 (12/50) against the 7B's 0.212 (8/50). Rewording does not break the system.
+This is reported separately and is not a held-out score: 49 of CK26's 50 reference
+queries are identical to CK25's.
 
 ## Limitations
 
-- One model only, `qwen2.5-coder:7b`. No model-size comparison was run.
+- Two model sizes from one family. No comparison across model families, and no
+  hosted frontier model.
 - Results are deterministic on fixed hardware but **not across hardware**: the same model
   and code on laptop CPU answered 2 of 15 dev questions differently from the A40.
 - 50 questions is a small benchmark; one question is worth 0.02 F1 on the test split.
@@ -177,7 +170,8 @@ This repository contains no dataset; `scripts/get_data.sh` downloads it.
   [repository](https://github.com/eccenca/ck25-dataset) · **CC-BY-4.0**, pinned at
   commit `cb928b2f`. No endorsement by eccenca is implied.
 - **Scorer:** [text2sparql-client](https://github.com/AKSW/text2sparql-client) 2.1.0, Apache-2.0.
-- **Model:** `qwen2.5-coder:7b`, **Apache-2.0**. Every result records the model that produced it.
+- **Models:** `qwen2.5-coder:32b` and `qwen2.5-coder:7b`, both **Apache-2.0**. Every
+  result records the model that produced it.
 - **Store:** [Apache Jena Fuseki](https://jena.apache.org/documentation/fuseki2/) 5.1.0, Apache-2.0.
 
 Code: [Apache-2.0](LICENSE). Cite this repository with [CITATION.cff](CITATION.cff).
