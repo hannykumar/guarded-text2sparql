@@ -1,6 +1,6 @@
 {
   "A0": {
-    "questions": 45,
+    "questions": 150,
     "clean_first_try": 0,
     "needed_repair": 0,
     "repair_succeeded": 0,
@@ -10,12 +10,12 @@
     "passing_all_guardrails_at_the_end": 0,
     "g1_blocks": 0,
     "first_failure_by_guardrail": {},
-    "repairs_per_question_median": -1,
-    "seconds_p50": 1.6,
-    "seconds_p95": 2.0
+    "repairs_per_question_median": -1.0,
+    "seconds_p50": 1.5,
+    "seconds_p95": 1.9
   },
   "A1": {
-    "questions": 45,
+    "questions": 150,
     "clean_first_try": 0,
     "needed_repair": 0,
     "repair_succeeded": 0,
@@ -25,12 +25,12 @@
     "passing_all_guardrails_at_the_end": 0,
     "g1_blocks": 0,
     "first_failure_by_guardrail": {},
-    "repairs_per_question_median": -1,
-    "seconds_p50": 1.2,
-    "seconds_p95": 1.6
+    "repairs_per_question_median": -1.0,
+    "seconds_p50": 1.0,
+    "seconds_p95": 1.4
   },
   "A2": {
-    "questions": 45,
+    "questions": 150,
     "clean_first_try": 0,
     "needed_repair": 0,
     "repair_succeeded": 0,
@@ -40,28 +40,29 @@
     "passing_all_guardrails_at_the_end": 0,
     "g1_blocks": 0,
     "first_failure_by_guardrail": {},
-    "repairs_per_question_median": -1,
-    "seconds_p50": 2.1,
-    "seconds_p95": 2.8
+    "repairs_per_question_median": -1.0,
+    "seconds_p50": 2.0,
+    "seconds_p95": 2.5
   },
   "A3": {
-    "questions": 45,
-    "clean_first_try": 18,
-    "needed_repair": 27,
-    "repair_succeeded": 6,
-    "repair_success_rate": 0.222,
-    "first_problem_fixed": 9,
-    "first_problem_fixed_rate": 0.333,
-    "passing_all_guardrails_at_the_end": 24,
+    "questions": 265,
+    "clean_first_try": 109,
+    "needed_repair": 156,
+    "repair_succeeded": 29,
+    "repair_success_rate": 0.186,
+    "first_problem_fixed": 41,
+    "first_problem_fixed_rate": 0.263,
+    "passing_all_guardrails_at_the_end": 138,
     "g1_blocks": 0,
     "first_failure_by_guardrail": {
-      "G7 plausibility": 12,
-      "G4 vocabulary": 9,
-      "G5 entity": 3,
-      "G2 syntax": 3
+      "G7 plausibility": 67,
+      "G4 vocabulary": 41,
+      "G2 syntax": 32,
+      "G6 execution": 11,
+      "G5 entity": 6
     },
     "repairs_per_question_median": 1,
     "seconds_p50": 4.2,
-    "seconds_p95": 8.4
+    "seconds_p95": 7.8
   }
 }

@@ -7,6 +7,8 @@ it executes our query and the reference query and compares the result sets.
 
 ### dev
 
+The 15 questions used while building the system.
+
 | Config | What it adds | F1 | Precision | Recall | Exact | Runs |
 |---|---|---|---|---|---|---|
 | A0 | LLM only | 0.067 | 0.067 | 0.067 | 1.0/15 | 3 |
@@ -16,11 +18,22 @@ it executes our query and the reference query and compares the result sets.
 
 ### test
 
-_not run yet_
+The 35 questions held back until the design was frozen. **These are the honest numbers.**
 
-### all
+| Config | What it adds | F1 | Precision | Recall | Exact | Runs |
+|---|---|---|---|---|---|---|
+| A0 | LLM only | 0.029 | 0.029 | 0.029 | 1.0/35 | 3 |
+| A1 | + schema card | 0.084 | 0.114 | 0.078 | 2.0/35 | 3 |
+| A2 | + entity linking | 0.170 | 0.200 | 0.163 | 5.0/35 | 3 |
+| A3 | + guardrails and repair | 0.170 | 0.200 | 0.163 | 5.0/35 | 3 |
 
-_not run yet_
+### ck26
+
+CK26: the same graph with the questions reworded (49 of 50 reference queries are identical to CK25's). A paraphrase-robustness check, not a held-out set.
+
+| Config | What it adds | F1 | Precision | Recall | Exact | Runs |
+|---|---|---|---|---|---|---|
+| A3 | + guardrails and repair | 0.212 | 0.240 | 0.203 | 8.0/50 | 1 |
 
 ## Guardrail diagnostics
 
@@ -28,12 +41,12 @@ From the pipeline's own traces, not from the reference answers.
 
 | Config | Questions | Clean first try | Needed repair | Repair worked | Pass at end | G1 blocks | p50 s | p95 s |
 |---|---|---|---|---|---|---|---|---|
-| A0 | 45 | 0 | 0 | 0 | 0 | 0 | 1.6 | 2.0 |
-| A1 | 45 | 0 | 0 | 0 | 0 | 0 | 1.2 | 1.6 |
-| A2 | 45 | 0 | 0 | 0 | 0 | 0 | 2.1 | 2.8 |
-| A3 | 45 | 18 | 27 | 6 (22%) | 24 | 0 | 4.2 | 8.4 |
+| A0 | 150 | 0 | 0 | 0 | 0 | 0 | 1.5 | 1.9 |
+| A1 | 150 | 0 | 0 | 0 | 0 | 0 | 1.0 | 1.4 |
+| A2 | 150 | 0 | 0 | 0 | 0 | 0 | 2.0 | 2.5 |
+| A3 | 265 | 109 | 156 | 29 (19%) | 138 | 0 | 4.2 | 7.8 |
 
-First guardrail to fire, per config: `{"A0": {}, "A1": {}, "A2": {}, "A3": {"G7 plausibility": 12, "G4 vocabulary": 9, "G5 entity": 3, "G2 syntax": 3}}`
+First guardrail to fire, per config: `{"A0": {}, "A1": {}, "A2": {}, "A3": {"G7 plausibility": 67, "G4 vocabulary": 41, "G2 syntax": 32, "G6 execution": 11, "G5 entity": 6}}`
 
 
 ## How to read this
