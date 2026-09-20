@@ -146,6 +146,35 @@ def our_result(query: str) -> tuple[list[str], list[str]]:
     return rows or ["(no results)"], iris
 
 
+def ablation() -> list[dict]:
+    """Each configuration's score on the held-back questions, in words as well as numbers."""
+    described = [
+        ("A0", "The model on its own", "No help at all: just the question."),
+        ("A1", "Told what exists", "Given the list of things and relationships in the graph."),
+        ("A2", "Given the real IDs", "Names in the question are looked up and resolved to real IDs."),
+        ("A3", "Checked before answering", "Eight checks on the query, with up to two retries."),
+    ]
+    out = []
+    for name, title, blurb in described:
+        path = Path(f"results/{name}/test/run1/metrics.json")
+        if not path.exists():
+            continue
+        metrics = json.loads(path.read_text())
+        questions = {k: v for k, v in metrics.items() if k.startswith("ck25:")}
+        out.append(
+            {
+                "id": name,
+                "title": title,
+                "blurb": blurb,
+                "f1": round(metrics["average"]["set_F"], 3),
+                "exact": sum(1 for v in questions.values() if v.get("set_F", 0) > 0.99),
+                "partial": sum(1 for v in questions.values() if 0 < v.get("set_F", 0) <= 0.99),
+                "total": len(questions),
+            }
+        )
+    return out
+
+
 def main() -> int:
     metrics = json.loads((RUN / "metrics.json").read_text())
     answers = {a["qname"]: a for a in json.loads((RUN / "answers.json").read_text()) if "qname" in a}
@@ -185,9 +214,7 @@ def main() -> int:
             {
                 "schema": schema(),
                 "questions": questions,
-                "scores": {
-                    "A0": 0.029, "A1": 0.084, "A2": 0.170, "A3": 0.170,
-                },
+                "scores": ablation(),
             },
             indent=1,
         )

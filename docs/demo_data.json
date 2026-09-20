@@ -3065,10 +3065,42 @@
    }
   }
  ],
- "scores": {
-  "A0": 0.029,
-  "A1": 0.084,
-  "A2": 0.17,
-  "A3": 0.17
- }
+ "scores": [
+  {
+   "id": "A0",
+   "title": "The model on its own",
+   "blurb": "No help at all: just the question.",
+   "f1": 0.029,
+   "exact": 1,
+   "partial": 0,
+   "total": 35
+  },
+  {
+   "id": "A1",
+   "title": "Told what exists",
+   "blurb": "Given the list of things and relationships in the graph.",
+   "f1": 0.084,
+   "exact": 2,
+   "partial": 2,
+   "total": 35
+  },
+  {
+   "id": "A2",
+   "title": "Given the real IDs",
+   "blurb": "Names in the question are looked up and resolved to real IDs.",
+   "f1": 0.17,
+   "exact": 5,
+   "partial": 2,
+   "total": 35
+  },
+  {
+   "id": "A3",
+   "title": "Checked before answering",
+   "blurb": "Eight checks on the query, with up to two retries.",
+   "f1": 0.17,
+   "exact": 5,
+   "partial": 2,
+   "total": 35
+  }
+ ]
 }
