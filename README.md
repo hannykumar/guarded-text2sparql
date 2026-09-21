@@ -10,9 +10,10 @@ knowing that Karen Brant's IRI ends in `%40company.org`. So the model writes the
 and ordinary code supplies the facts and checks the output. Nothing the model produces
 is trusted until it has been verified against the graph.
 
-> **Status:** the system and its evaluation harness are complete and tested offline.
-> The measured results are being collected; `results/RESULTS.md` is generated from them.
-> Progress is tracked in [issues](../../issues).
+> **Status:** complete. On the 35 held-back test questions, F1 rises from 0.029 (LLM only)
+> to 0.386 with schema context, entity linking and guardrails (Qwen2.5-Coder 32B), and every
+> returned query is read-only, valid and runs. Full results below and in
+> [results/RESULTS.md](results/RESULTS.md).
 
 ## Architecture
 
@@ -89,12 +90,14 @@ make evaluate-test     # the 35 held-back questions, seen once
 
 ## Demo
 
-[**Open the demo page**](https://claude.ai/code/artifact/a80c0125-8df1-4a65-b2b9-e6cfd96af7ff) — all 35
+[**Open the demo page**](https://hannykumar.github.io/guarded-text2sparql/): all 35
 held-back questions with the query the system wrote, what each guardrail said, the answer it
 got, and a picture of the facts involved. It is self-contained: no model, no store, nothing to
 run. Rebuild it from the saved results with `make demo`.
 
 ## Results
+
+`results/` holds the Qwen2.5-Coder 32B runs, `results-7b/` the 7B runs.
 
 Two models, identical code, temperature 0, one A40. Full tables in
 [results/RESULTS.md](results/RESULTS.md), setup in

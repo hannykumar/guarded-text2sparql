@@ -15,6 +15,5 @@ retries.log
 results/traces.jsonl
 results/*.jsonl
 results/logs/
-docs/demo_built.html
 results-7b/**/true.json
 results-7b/**/*.db

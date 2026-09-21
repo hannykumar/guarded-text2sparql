@@ -11,6 +11,6 @@ from pathlib import Path
 data = json.loads(Path("docs/demo_data.json").read_text())
 payload = json.dumps(data, separators=(",", ":"), ensure_ascii=True).replace("</", "<\\/")
 page = Path("docs/demo.html").read_text()
-out = Path("docs/demo_built.html")
+out = Path("docs/index.html")  # committed: GitHub Pages serves /docs
 out.write_text(page.replace("__DEMO_DATA__", payload), encoding="ascii", errors="xmlcharrefreplace")
 print(f"{out} ({round(len(out.read_text()) / 1024)} KB)")

@@ -1,0 +1,821 @@
+<title>Guarded Text2SPARQL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600;700&display=swap">
+
+<style>
+:root {
+  --paper: #f2f5f4;
+  --surface: #ffffff;
+  --sunk: #e7ecea;
+  --board: #0f1a1c;          /* the graph canvas: always dark, like a board */
+  --board-line: #1e3034;
+  --ink: #0e1518;
+  --ink-2: #435055;
+  --ink-3: #75848a;
+  --line: #d3dcda;
+  --copper: #a85c2b;
+  --copper-soft: #e8d3c3;
+  --teal: #237a67;
+  --teal-soft: #cfe5df;
+  --amber: #8a6a12;
+  --brick: #a5382e;
+  --ring: #237a67;
+  --shadow-sm: 0 1px 2px rgba(14, 21, 24, .05);
+  --shadow: 0 2px 4px rgba(14, 21, 24, .04), 0 12px 32px rgba(14, 21, 24, .07);
+  --r: 12px;
+  --s--1: .8125rem;
+  --s-0: .9688rem;
+  --s-1: 1.1875rem;
+  --s-2: 1.5rem;
+  --s-3: 2rem;
+  --s-4: 2.9rem;
+}
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    --paper: #0c1113;
+    --surface: #121a1d;
+    --sunk: #182226;
+    --board: #080e10;
+    --board-line: #1b2b2f;
+    --ink: #e9efee;
+    --ink-2: #aab8bb;
+    --ink-3: #7b8b90;
+    --line: #253236;
+    --copper: #dd9055;
+    --copper-soft: #4a2e1b;
+    --teal: #57bda4;
+    --teal-soft: #173a34;
+    --amber: #d5ab4b;
+    --brick: #e37a6d;
+    --ring: #57bda4;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+    --shadow: 0 2px 4px rgba(0, 0, 0, .3), 0 14px 36px rgba(0, 0, 0, .38);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0c1113; --surface: #121a1d; --sunk: #182226; --board: #080e10; --board-line: #1b2b2f;
+  --ink: #e9efee; --ink-2: #aab8bb; --ink-3: #7b8b90; --line: #253236;
+  --copper: #dd9055; --copper-soft: #4a2e1b; --teal: #57bda4; --teal-soft: #173a34;
+  --amber: #d5ab4b; --brick: #e37a6d; --ring: #57bda4;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+  --shadow: 0 2px 4px rgba(0, 0, 0, .3), 0 14px 36px rgba(0, 0, 0, .38);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 var(--s-0)/1.6 "IBM Plex Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -.018em; text-wrap: balance; }
+h1 { font-size: var(--s-4); letter-spacing: -.035em; line-height: 1.05; }
+h2 { font-size: var(--s-3); line-height: 1.15; }
+h3 { font-size: var(--s-1); }
+p { margin: 0; }
+code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 5px; }
+.wrap { width: min(1140px, 100% - 44px); margin-inline: auto; }
+.prose { max-width: 64ch; color: var(--ink-2); }
+.prose strong { color: var(--ink); font-weight: 600; }
+
+/* ---------- step scaffolding: numbering is real, these are sequential ---------- */
+section.step { padding: 68px 0; border-top: 1px solid var(--line); }
+.step-head { display: flex; gap: 16px; align-items: baseline; margin-bottom: 22px; }
+.step-num {
+  font-family: "IBM Plex Mono", monospace; font-size: var(--s--1); font-weight: 600;
+  color: var(--copper); border: 1px solid var(--copper-soft); background: var(--copper-soft);
+  border-radius: 999px; padding: 3px 11px; flex: none;
+}
+:root[data-theme="dark"] .step-num, :root:not([data-theme="light"]) .step-num { color: var(--copper); }
+
+/* ---------- hero ---------- */
+.hero { padding: 76px 0 60px; }
+.hero .kicker {
+  font-family: "IBM Plex Mono", monospace; font-size: var(--s--1); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 18px;
+}
+.hero p.big { font-size: var(--s-1); color: var(--ink-2); max-width: 60ch; margin-top: 20px; line-height: 1.55; }
+.hero .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
+.chip {
+  font-size: var(--s--1); border: 1px solid var(--line); background: var(--surface);
+  border-radius: 999px; padding: 6px 13px; color: var(--ink-2);
+}
+.chip b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------- cards ---------- */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow-sm); }
+.card-head { padding: 13px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.card-head h4 { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.card-body { padding: 18px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+
+/* ---------- fact sentences ---------- */
+.facts { display: grid; gap: 8px; }
+.fact {
+  display: grid; grid-template-columns: auto auto auto; gap: 8px; align-items: center;
+  justify-content: start; font-size: var(--s--1);
+}
+.fact span { padding: 5px 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--sunk); }
+.fact .subj { border-color: var(--copper); color: var(--copper); font-weight: 500; }
+.fact .rel { font-family: "IBM Plex Mono", monospace; color: var(--teal); border-style: dashed; background: none; }
+
+/* ---------- interactive graph ---------- */
+.stage { position: relative; background: var(--board); border-radius: 0 0 var(--r) var(--r); overflow: hidden; }
+.stage.rounded { border-radius: var(--r); }
+.stage svg { display: block; width: 100%; touch-action: none; cursor: grab; }
+.stage svg.dragging { cursor: grabbing; }
+.stage .hint {
+  position: absolute; left: 14px; bottom: 12px; font-size: 11.5px; color: #6f8a90;
+  font-family: "IBM Plex Mono", monospace; letter-spacing: .04em; pointer-events: none;
+}
+.zoomers { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.zoomers button {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid #24383c; background: #101c1f;
+  color: #cfe0e2; font: 500 15px "IBM Plex Sans", sans-serif; cursor: pointer; line-height: 1;
+}
+.zoomers button:hover { background: #17272b; }
+.node-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; fill: #d5e3e4; pointer-events: none; }
+.node-label.dim { fill: #5d7278; }
+.edge-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; fill: #6d878c; pointer-events: none; }
+.tip {
+  position: absolute; pointer-events: none; background: #0b1416; color: #e4eeef; border: 1px solid #27393d;
+  border-radius: 8px; padding: 7px 10px; font-size: 12px; max-width: 260px; opacity: 0; transition: opacity .12s;
+}
+.tip .t { color: #8fb3ad; font-family: "IBM Plex Mono", monospace; font-size: 10.5px; display: block; }
+
+/* ---------- scoreboard ---------- */
+.bars { display: grid; gap: 14px; }
+.bar-row { display: grid; grid-template-columns: minmax(170px, 230px) 1fr; gap: 18px; align-items: center; }
+@media (max-width: 720px) { .bar-row { grid-template-columns: 1fr; gap: 6px; } }
+.bar-label b { display: block; font-weight: 600; }
+.bar-label span { font-size: var(--s--1); color: var(--ink-3); }
+.track { position: relative; height: 38px; background: var(--sunk); border-radius: 8px; overflow: hidden; }
+.fill { height: 100%; background: linear-gradient(90deg, var(--teal), color-mix(in srgb, var(--teal) 70%, var(--copper))); width: 0; transition: width .9s cubic-bezier(.22,.7,.3,1); }
+@media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+.fill.peak { background: linear-gradient(90deg, var(--copper), color-mix(in srgb, var(--copper) 65%, var(--teal))); }
+.track .value {
+  position: absolute; inset: 0; display: flex; align-items: center; padding-left: 14px;
+  font-size: var(--s--1); font-weight: 500; color: var(--ink); mix-blend-mode: normal;
+}
+.track .value .f1 { color: var(--ink-3); margin-left: 10px; font-family: "IBM Plex Mono", monospace; }
+
+/* ---------- pipeline ---------- */
+.pipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.stage-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 15px; }
+.stage-card .who {
+  font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 999px; display: inline-block; margin-bottom: 9px;
+}
+.who.model { color: var(--copper); background: var(--copper-soft); }
+.who.code { color: var(--teal); background: var(--teal-soft); }
+.stage-card h4 { font-size: var(--s-0); margin-bottom: 5px; }
+.stage-card p { font-size: var(--s--1); color: var(--ink-2); }
+.stage-card .ex { margin-top: 9px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-3); word-break: break-all; }
+
+/* ---------- explorer ---------- */
+.workbench { display: grid; grid-template-columns: minmax(230px, 290px) 1fr; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .workbench { grid-template-columns: 1fr; } }
+.filters { display: flex; gap: 6px; padding: 10px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.filters button {
+  font-size: var(--s--1); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  border-radius: 999px; padding: 4px 11px; cursor: pointer;
+}
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.qscroll { max-height: 560px; overflow-y: auto; }
+.qitem {
+  display: flex; gap: 10px; align-items: baseline; width: 100%; text-align: left; background: none;
+  border: 0; border-bottom: 1px solid var(--line); padding: 11px 14px; cursor: pointer;
+  font: 400 var(--s--1)/1.45 "IBM Plex Sans", sans-serif; color: var(--ink-2);
+}
+.qitem:hover { background: var(--sunk); color: var(--ink); }
+.qitem[aria-current="true"] { background: var(--sunk); color: var(--ink); box-shadow: inset 3px 0 0 var(--copper); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; translate: 0 -1px; }
+.dot.right { background: var(--teal); }
+.dot.partial { background: var(--amber); }
+.dot.wrong { background: var(--brick); opacity: .5; }
+.detail { display: grid; gap: 14px; }
+.verdict { display: inline-flex; gap: 7px; align-items: center; font-size: var(--s--1); padding: 4px 11px; border-radius: 999px; border: 1px solid; }
+.verdict.right { color: var(--teal); border-color: var(--teal); background: var(--teal-soft); }
+.verdict.partial { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 45%, transparent); }
+.verdict.wrong { color: var(--brick); border-color: color-mix(in srgb, var(--brick) 40%, transparent); }
+pre.sparql { margin: 0; padding: 16px 18px; overflow-x: auto; background: var(--sunk); font-size: var(--s--1); line-height: 1.55; border-radius: 0 0 var(--r) var(--r); }
+.kw { color: var(--copper); font-weight: 600; }
+.iri { color: var(--teal); }
+.var { color: var(--ink-2); }
+.checks { display: grid; gap: 9px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: var(--s--1); }
+.badge { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; flex: none; border: 1px solid; }
+.badge.pass { color: var(--teal); border-color: color-mix(in srgb, var(--teal) 40%, transparent); background: var(--teal-soft); }
+.badge.fail { color: var(--brick); border-color: color-mix(in srgb, var(--brick) 40%, transparent); }
+.answers { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; }
+.answers li { list-style: none; background: var(--sunk); border: 1px solid var(--line); border-radius: 7px; padding: 5px 10px; font-size: var(--s--1); }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: var(--s--1); color: var(--ink-3); padding: 12px 18px 0; }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; }
+
+/* ---------- schema ---------- */
+.schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 11px; }
+.cls { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; }
+.cls h4 { font-family: "IBM Plex Mono", monospace; color: var(--copper); font-size: var(--s-0); margin-bottom: 3px; }
+.cls .count { font-size: var(--s--1); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.cls p { font-size: var(--s--1); color: var(--ink-2); margin-top: 7px; }
+table.props { width: 100%; border-collapse: collapse; font-size: var(--s--1); }
+table.props th, table.props td { text-align: left; padding: 8px 14px; border-bottom: 1px solid var(--line); }
+table.props th { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+table.props td:first-child { font-family: "IBM Plex Mono", monospace; color: var(--copper); white-space: nowrap; }
+.scroll-x { overflow-x: auto; }
+details.more { margin-top: 14px; }
+details.more summary { cursor: pointer; font-size: var(--s--1); color: var(--teal); }
+
+/* ---------- ask ---------- */
+.ask { display: flex; gap: 8px; flex-wrap: wrap; }
+.ask input { flex: 1 1 320px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); color: var(--ink); font: 400 var(--s-0) "IBM Plex Sans", sans-serif; }
+.ask button { padding: 11px 19px; border-radius: 9px; border: 1px solid var(--copper); background: var(--copper); color: #fff; font: 600 var(--s-0) "IBM Plex Sans", sans-serif; cursor: pointer; }
+.note { font-size: var(--s--1); color: var(--ink-3); margin-top: 12px; }
+footer { border-top: 1px solid var(--line); padding: 26px 0 54px; color: var(--ink-3); font-size: var(--s--1); }
+</style>
+
+<header class="hero wrap">
+  <div class="kicker">eccenca CK25 &middot; questions into queries</div>
+  <h1>Ask a database<br>in plain English</h1>
+  <p class="big">
+    A company's data is stored as a web of connected facts. Getting answers out of it normally
+    means writing code in a language called SPARQL. This system lets you ask in English instead &mdash;
+    an AI drafts the query, and <strong>ordinary code checks it before anyone sees it</strong>.
+  </p>
+  <div class="chips">
+    <span class="chip"><b>26,903</b> facts in the graph</span>
+    <span class="chip"><b>35</b> questions it had never seen</span>
+    <span class="chip"><b>13&times;</b> better with help than without</span>
+  </div>
+</header>
+
+<section class="step wrap" id="s1">
+  <div class="step-head"><span class="step-num">01</span><h2>What the data looks like</h2></div>
+  <p class="prose">
+    Not tables and rows. Every piece of information is a little three-word sentence:
+    <strong>something, a relationship, something else</strong>. Millions of these link up into a web.
+    Below is one real corner of it &mdash; Karen Brant, an employee at the fictional company in this dataset.
+  </p>
+  <div class="two" style="margin-top:22px">
+    <div class="card">
+      <div class="card-head"><h4>The same facts, written out</h4></div>
+      <div class="card-body facts" id="fact-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h4>The same facts, drawn</h4>
+        <span style="font-size:var(--s--1);color:var(--ink-3)">drag &middot; scroll to zoom</span>
+      </div>
+      <div class="stage" id="stage-intro" style="height:330px"></div>
+    </div>
+  </div>
+</section>
+
+<section class="step wrap" id="s2">
+  <div class="step-head"><span class="step-num">02</span><h2>Why an AI can't do this alone</h2></div>
+  <p class="prose">
+    Every thing in the graph has a unique ID, and the IDs are not guessable. Ask
+    <em>"which department is Ms. Brant in?"</em> and the AI has to name her exactly. It can't.
+    So code looks the name up first and hands over the real ID.
+  </p>
+  <div class="two" style="margin-top:22px">
+    <div class="card">
+      <div class="card-head"><h4>What the AI invents</h4></div>
+      <div class="card-body">
+        <p class="mono" style="font-size:var(--s--1);color:var(--brick);word-break:break-all">prodi:karen-brant</p>
+        <p class="note" style="margin-top:10px">Plausible. Doesn't exist. The query returns nothing at all.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h4>What the code finds</h4></div>
+      <div class="card-body">
+        <p class="mono" style="font-size:var(--s--1);color:var(--teal);word-break:break-all">&hellip;/prod-instances/empl-Karen.Brant%40company.org</p>
+        <p class="note" style="margin-top:10px">Found by matching "Ms. Brant" against 3,890 real names. This one fix is the single biggest gain in the whole project.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="step wrap" id="s3">
+  <div class="step-head"><span class="step-num">03</span><h2>What happens to your question</h2></div>
+  <p class="prose">
+    Four steps. The AI does two of them; code does the rest and has the last word &mdash; it can reject
+    the AI's work and send it back with the exact error, up to twice.
+  </p>
+  <div class="pipe" style="margin-top:22px">
+    <div class="stage-card">
+      <span class="who model">AI</span>
+      <h4>Spot the names</h4>
+      <p>Which words refer to real things?</p>
+      <div class="ex">"Ms. Brant"</div>
+    </div>
+    <div class="stage-card">
+      <span class="who code">Code</span>
+      <h4>Look them up</h4>
+      <p>Match each name against every name in the graph and hand over the real IDs.</p>
+      <div class="ex">empl-Karen.Brant%40company.org</div>
+    </div>
+    <div class="stage-card">
+      <span class="who model">AI</span>
+      <h4>Write the query</h4>
+      <p>Given the question, the real IDs, and the list of everything that exists.</p>
+      <div class="ex">SELECT ?result WHERE { &hellip; }</div>
+    </div>
+    <div class="stage-card">
+      <span class="who code">Code</span>
+      <h4>Check it, then answer</h4>
+      <p>Eight checks: read-only, valid, names exist, actually runs. Fail &rarr; back to the AI.</p>
+      <div class="ex">Engineering</div>
+    </div>
+  </div>
+</section>
+
+<section class="step wrap" id="s4">
+  <div class="step-head"><span class="step-num">04</span><h2>Is the help worth it?</h2></div>
+  <p class="prose">
+    To find out, the system ran on the same 35 questions four times over, switching one piece on
+    at a time. Bars show <strong>how many of the 35 it got completely right</strong>. Use the
+    toggle to see the same experiment with a much smaller model.
+  </p>
+  <div class="card" style="margin-top:22px">
+    <div class="card-head">
+      <h4 id="bars-title">Large model &middot; 32 billion parameters</h4>
+      <div class="filters" style="border:0;padding:0">
+        <button id="m-32" data-m="big" aria-pressed="true">32B</button>
+        <button id="m-7" data-m="small" aria-pressed="false">7B</button>
+      </div>
+    </div>
+    <div class="card-body bars" id="bars"></div>
+  </div>
+  <div class="two" style="margin-top:16px">
+    <div class="card"><div class="card-body">
+      <h3 style="margin-bottom:8px">What helped</h3>
+      <p class="prose" style="max-width:none">
+        Telling the model what exists, and giving it the real IDs: 1 question becomes 9. Note that
+        the first bar is the same for both models &mdash; without that help, a model four and a half
+        times bigger gains nothing at all, because the IDs are not guessable at any size.
+      </p>
+    </div></div>
+    <div class="card"><div class="card-body">
+      <h3 style="margin-bottom:8px">What the checks are worth</h3>
+      <p class="prose" style="max-width:none">
+        With the small model they added <em>nothing</em> (5 right either way): it could not act on
+        the error messages. With the large model the same checks take 9 right to 11. A repair is a
+        conversation, and it pays off only with a model good enough to use the feedback.
+      </p>
+    </div></div>
+  </div>
+  <details class="more">
+    <summary>What the 0.029 and 0.170 numbers mean</summary>
+    <p class="prose" style="margin-top:10px">
+      That's F1 &mdash; a score from 0 to 1 that gives partial credit. A question whose answer should list
+      ten suppliers and gets seven of them right earns part of a point rather than nothing. It's the
+      benchmark's official measure, which is why it's reported, but "5 of 35 completely right" is the
+      honest plain-English version of the same run.
+    </p>
+  </details>
+</section>
+
+<section class="step wrap" id="s5">
+  <div class="step-head"><span class="step-num">05</span><h2>Every question, and what it did</h2></div>
+  <p class="prose" style="margin-bottom:20px">
+    All 35 held-back questions. Pick one to see the query it wrote, what the checks said, the answer
+    it got, and the facts involved. Green dots are right, amber partly right, red wrong.
+  </p>
+  <div class="workbench">
+    <aside class="card" style="overflow:hidden">
+      <div class="filters" id="filters">
+        <button data-f="all" aria-pressed="true">All 35</button>
+        <button data-f="right" aria-pressed="false">Right</button>
+        <button data-f="partial" aria-pressed="false">Partly</button>
+        <button data-f="wrong" aria-pressed="false">Wrong</button>
+      </div>
+      <div class="qscroll" id="qlist"></div>
+    </aside>
+    <div class="detail" id="detail"></div>
+  </div>
+</section>
+
+<section class="step wrap" id="s6">
+  <div class="step-head"><span class="step-num">06</span><h2>Everything that exists in this graph</h2></div>
+  <p class="prose">
+    This is exactly what the AI is shown before it writes anything &mdash; it cannot use a name that
+    isn't on this list. That restriction is most of why the schema step helped so much.
+  </p>
+  <div class="schema-grid" id="classes" style="margin-top:22px"></div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-head"><h4>The relationships, and which way they point</h4></div>
+    <div class="scroll-x"><table class="props" id="props"></table></div>
+  </div>
+  <p class="note">
+    Direction matters and is a real source of errors: employees point to their department, never the
+    other way. Four of the failures got exactly this backwards.
+  </p>
+</section>
+
+<section class="step wrap" id="s7">
+  <div class="step-head"><span class="step-num">07</span><h2>Try your own question</h2></div>
+  <div class="card">
+    <div class="card-body">
+      <p class="prose" style="margin-bottom:14px">
+        This one needs the system running on your own machine (<code>make store load</code>, then
+        <code>make serve</code>). Everything above works from a link; this box doesn't.
+      </p>
+      <form class="ask" id="ask-form">
+        <input id="ask-input" placeholder="Which suppliers do we have in Toulouse?" aria-label="Your question">
+        <button type="submit">Write the query</button>
+      </form>
+      <div id="ask-out" class="note"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  Data: CK25 by eccenca GmbH (CC-BY-4.0), a fictional electronics company.
+  Model: qwen2.5-coder:7b (Apache-2.0). Scored by running both queries and comparing the answers.
+</footer>
+
+<script id="demo-data" type="application/json">{"schema":{"classes":[{"id":"pv:Price","label":"Price","comment":"A price object to deal with multiple prices and/or currencies.","instances":1009},{"id":"pv:Hardware","label":"Hardware","comment":"The hardware products produced.","instances":1000},{"id":"pv:Supplier","label":"Supplier","comment":"The Supplier of some item(s).","instances":250},{"id":"pv:BomPart","label":"BOM Part","comment":"A (number of) part(s) in a BOM.","instances":197},{"id":"pv:Employee","label":"Employee","comment":"An employee in my company.","instances":47},{"id":"pv:ProductCategory","label":"Product Category","comment":"The category of a product.","instances":26},{"id":"pv:BillOfMaterial","label":"Bill of Material (BOM)","comment":"The Bill of Material (BOM) of a complex product.","instances":20},{"id":"pv:Service","label":"Service","comment":"Some value added service realized based on other product(s).","instances":9},{"id":"pv:Department","label":"Department","comment":"A department in an organization.","instances":6},{"id":"pv:Manager","label":"Manager","comment":"An employee with some direct reports and management duties.","instances":6},{"id":"pv:Agent","label":"Agent","comment":"Abstract base class for people, robots or other things that can act.","instances":0},{"id":"pv:Product","label":"Product","comment":"Anything that we make and/or sell.","instances":0}],"properties":[{"id":"pv:addressCountry","from":"pv:Agent","to":"string","object":false},{"id":"pv:addressCountryCode","from":"pv:Agent","to":"string","object":false},{"id":"pv:addressLocality","from":"pv:Agent","to":"string","object":false},{"id":"pv:addressText","from":"pv:Agent","to":"string","object":false},{"id":"pv:amount","from":"pv:Price","to":"decimal","object":false},{"id":"pv:areaOfExpertise","from":"pv:Agent","to":"pv:ProductCategory","object":true},{"id":"pv:compatibleProduct","from":"pv:Product","to":"pv:Product","object":true},{"id":"pv:country","from":"pv:Supplier","to":"Country","object":true},{"id":"pv:currency","from":"pv:Price","to":"string","object":false},{"id":"pv:depth_mm","from":"pv:Hardware","to":"decimal","object":false},{"id":"pv:eligibleFor","from":"pv:Service","to":"pv:Product","object":true},{"id":"pv:email","from":"pv:Agent","to":"string","object":false},{"id":"pv:hasBomPart","from":"pv:BillOfMaterial","to":"pv:BomPart","object":true},{"id":"pv:hasCategory","from":"pv:Product","to":"pv:ProductCategory","object":true},{"id":"pv:hasDirectReport","from":"pv:Manager","to":"pv:Employee","object":true},{"id":"pv:hasManager","from":"pv:Employee","to":"pv:Manager","object":true},{"id":"pv:hasPart","from":"pv:BomPart","to":"pv:Product","object":true},{"id":"pv:hasProductManager","from":"pv:Product","to":"pv:Employee","object":true},{"id":"pv:hasSupplier","from":"pv:Product","to":"pv:Supplier","object":true},{"id":"pv:height_mm","from":"pv:Hardware","to":"decimal","object":false},{"id":"pv:id","from":"?","to":"string","object":false},{"id":"pv:memberOf","from":"pv:Agent","to":"pv:Department","object":true},{"id":"pv:name","from":"?","to":"string","object":false},{"id":"pv:phone","from":"pv:Agent","to":"string","object":false},{"id":"pv:price","from":"pv:Product","to":"pv:Price","object":true},{"id":"pv:quantity","from":"pv:BomPart","to":"decimal","object":false},{"id":"pv:reliabilityIndex","from":"pv:Hardware","to":"decimal","object":false},{"id":"pv:responsibleFor","from":"pv:Department","to":"pv:Product","object":true},{"id":"pv:weight_g","from":"pv:Hardware","to":"decimal","object":false},{"id":"pv:width_mm","from":"pv:Hardware","to":"decimal","object":false}]},"questions":[{"id":"ck25:1-en","question":"In which department is Ms. Brant?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  VALUES ?brant { prodi:empl-Karen.Brant%40company.org prodi:empl-Sylvester.Brant%40company.org }\n  ?brant pv:memberOf ?result .\n}","f1":0.667,"rows":["Engineering","Data Services"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","label":"Karen Brant","type":"pv:Employee","focus":true},{"id":"Karen Brant","label":"Karen Brant","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Inductor","label":"Inductor","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Thomas.Mueller%40company.org","label":"Thomas Mueller","type":"pv:Manager","focus":false},{"id":"http://ld.company.org/prod-instances/dept-73191","label":"Engineering","type":"pv:Department","focus":true},{"id":"Friedrichstra\u00dfe 664, 30805 Willich","label":"Friedrichstra\u00dfe 664, 30805 Willich","type":"value","focus":false},{"id":"Karen.Brant@company.org","label":"Karen.Brant@company.org","type":"value","focus":false},{"id":"(00530) 5040048","label":"(00530) 5040048","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","label":"Sylvester Brant","type":"pv:Employee","focus":true},{"id":"Sylvester Brant","label":"Sylvester Brant","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Strain","label":"Strain","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Sensor","label":"Sensor","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Oscillator","label":"Oscillator","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Network","label":"Network","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Elena.Herzog%40company.org","label":"Elena Herzog","type":"pv:Manager","focus":false},{"id":"http://ld.company.org/prod-instances/dept-41622","label":"Data Services","type":"pv:Department","focus":true},{"id":"Holstenwall 310, 68139 Aue","label":"Holstenwall 310, 68139 Aue","type":"value","focus":false},{"id":"Sylvester.Brant@company.org","label":"Sylvester.Brant@company.org","type":"value","focus":false},{"id":"(08514) 9139423","label":"(08514) 9139423","type":"value","focus":false},{"id":"Engineering","label":"Engineering","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Z249-1364492","label":"Z249-1364492 - Meter Transducer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-F344-7012314","label":"F344-7012314 - Switch Encoder Transducer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-M605-5951566","label":"M605-5951566 - Rheostat Transformer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-N463-8050264","label":"N463-8050264 - Multiplexer Network","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-N733-1946687","label":"N733-1946687 - LCD Encoder","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-O184-6903943","label":"O184-6903943 - Oscillator Crystal","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-V404-9975399","label":"V404-9975399 - Resonator Transformer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/srv-D215-3449390","label":"D215-3449390 - Manual Inspection","type":"pv:Service","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","to":"Karen Brant","label":"label"},{"from":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Inductor","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","to":"http://ld.company.org/prod-instances/empl-Thomas.Mueller%40company.org","label":"pv:hasManager"},{"from":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","to":"http://ld.company.org/prod-instances/dept-73191","label":"pv:memberOf"},{"from":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","to":"Friedrichstra\u00dfe 664, 30805 Willich","label":"pv:addressText"},{"from":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","to":"Karen.Brant@company.org","label":"pv:email"},{"from":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","to":"Karen Brant","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/empl-Karen.Brant%40company.org","to":"(00530) 5040048","label":"pv:phone"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"Sylvester Brant","label":"label"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Strain","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Sensor","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Oscillator","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Network","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"http://ld.company.org/prod-instances/empl-Elena.Herzog%40company.org","label":"pv:hasManager"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"http://ld.company.org/prod-instances/dept-41622","label":"pv:memberOf"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"Holstenwall 310, 68139 Aue","label":"pv:addressText"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"Sylvester.Brant@company.org","label":"pv:email"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"Sylvester Brant","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/empl-Sylvester.Brant%40company.org","to":"(08514) 9139423","label":"pv:phone"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"Engineering","label":"label"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"http://ld.company.org/prod-instances/hw-Z249-1364492","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"http://ld.company.org/prod-instances/hw-F344-7012314","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"http://ld.company.org/prod-instances/hw-M605-5951566","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"http://ld.company.org/prod-instances/hw-N463-8050264","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"http://ld.company.org/prod-instances/hw-N733-1946687","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"http://ld.company.org/prod-instances/hw-O184-6903943","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"http://ld.company.org/prod-instances/hw-V404-9975399","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-73191","to":"http://ld.company.org/prod-instances/srv-D215-3449390","label":"pv:responsibleFor"}]}},{"id":"ck25:2-en","question":"What is the telephone of Baldwin Dirksen?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  prodi:empl-Baldwin.Dirksen%40company.org pv:phone ?result .\n}","f1":1.0,"rows":["+49-6200-33069465"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","label":"Baldwin Dirksen","type":"pv:Employee","focus":true},{"id":"Baldwin Dirksen","label":"Baldwin Dirksen","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Capacitor","label":"Capacitor","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Dietlinde.Boehme%40company.org","label":"Dietlinde Boehme","type":"pv:Manager","focus":false},{"id":"http://ld.company.org/prod-instances/dept-85880","label":"Marketing","type":"pv:Department","focus":false},{"id":"Hauptwache 159, 16200 Heppenheim","label":"Hauptwache 159, 16200 Heppenheim","type":"value","focus":false},{"id":"Baldwin.Dirksen@company.org","label":"Baldwin.Dirksen@company.org","type":"value","focus":false},{"id":"+49-6200-33069465","label":"+49-6200-33069465","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","to":"Baldwin Dirksen","label":"label"},{"from":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Capacitor","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","to":"http://ld.company.org/prod-instances/empl-Dietlinde.Boehme%40company.org","label":"pv:hasManager"},{"from":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","to":"http://ld.company.org/prod-instances/dept-85880","label":"pv:memberOf"},{"from":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","to":"Hauptwache 159, 16200 Heppenheim","label":"pv:addressText"},{"from":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","to":"Baldwin.Dirksen@company.org","label":"pv:email"},{"from":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","to":"Baldwin Dirksen","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/empl-Baldwin.Dirksen%40company.org","to":"+49-6200-33069465","label":"pv:phone"}]}},{"id":"ck25:3-en","question":"Who is the manager of Heinrich Hoch?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  prodi:empl-Heinrich.Hoch%40company.org pv:hasManager ?result .\n}","f1":1.0,"rows":["Waldtraud Kuttner"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","label":"Heinrich Hoch","type":"pv:Employee","focus":true},{"id":"Heinrich Hoch","label":"Heinrich Hoch","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Coil","label":"Coil","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Gauge","label":"Gauge","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Transformer","label":"Transformer","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Crystal","label":"Crystal","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Waldtraud.Kuttner%40company.org","label":"Waldtraud Kuttner","type":"pv:Manager","focus":true},{"id":"http://ld.company.org/prod-instances/dept-84279","label":"Procurement","type":"pv:Department","focus":false},{"id":"Motzstra\u00dfe 741, 44446 Gl\u00fcckstadt","label":"Motzstra\u00dfe 741, 44446 Gl\u00fcckstadt","type":"value","focus":false},{"id":"Heinrich.Hoch@company.org","label":"Heinrich.Hoch@company.org","type":"value","focus":false},{"id":"+49-4446-26033173","label":"+49-4446-26033173","type":"value","focus":false},{"id":"Waldtraud Kuttner","label":"Waldtraud Kuttner","type":"value","focus":false},{"id":"Waldtraud.Kuttner@company.org","label":"Waldtraud.Kuttner@company.org","type":"value","focus":false},{"id":"(08798) 5416209","label":"(08798) 5416209","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"Heinrich Hoch","label":"label"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Coil","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Gauge","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Transformer","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"http://ld.company.org/prod-instances/prod-cat-Crystal","label":"pv:areaOfExpertise"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"http://ld.company.org/prod-instances/empl-Waldtraud.Kuttner%40company.org","label":"pv:hasManager"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"http://ld.company.org/prod-instances/dept-84279","label":"pv:memberOf"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"Motzstra\u00dfe 741, 44446 Gl\u00fcckstadt","label":"pv:addressText"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"Heinrich.Hoch@company.org","label":"pv:email"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"Heinrich Hoch","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/empl-Heinrich.Hoch%40company.org","to":"+49-4446-26033173","label":"pv:phone"},{"from":"http://ld.company.org/prod-instances/empl-Waldtraud.Kuttner%40company.org","to":"Waldtraud Kuttner","label":"label"},{"from":"http://ld.company.org/prod-instances/empl-Waldtraud.Kuttner%40company.org","to":"http://ld.company.org/prod-instances/dept-84279","label":"pv:memberOf"},{"from":"http://ld.company.org/prod-instances/empl-Waldtraud.Kuttner%40company.org","to":"Waldtraud.Kuttner@company.org","label":"pv:email"},{"from":"http://ld.company.org/prod-instances/empl-Waldtraud.Kuttner%40company.org","to":"Waldtraud Kuttner","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/empl-Waldtraud.Kuttner%40company.org","to":"(08798) 5416209","label":"pv:phone"}]}},{"id":"ck25:4-en","question":"What is the email of Sabrina from Marketing?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?employee a pv:Employee ;\n            pv:name ?name ;\n            pv:email ?result ;\n            pv:memberOf prodi:dept-85880 .\n  FILTER(?name = \"Sabrina Bayer\" || ?name = \"Sabrina Geiger\")\n} LIMIT 1","f1":1.0,"rows":["Sabrina.Geiger@company.org"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/dept-85880","label":"Marketing","type":"pv:Department","focus":true},{"id":"Marketing","label":"Marketing","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-C831-2580759","label":"C831-2580759 - Warp","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-D334-6681399","label":"D334-6681399 - Resistor Inductor Gauge","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-D844-3535311","label":"D844-3535311 - Resistor Gauge Encoder","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-G251-8414984","label":"G251-8414984 - Coil Rheostat","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-H402-6061531","label":"H402-6061531 - Switch","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-L586-5133830","label":"L586-5133830 - Multiplexer Dipole","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Q442-2123335","label":"Q442-2123335 - Aluminum Potentiometer Capacitor","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-R771-3893828","label":"R771-3893828 - Multiplexer LCD Transducer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Y299-9772513","label":"Y299-9772513 - Log-periodic Oscillator Transformer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/srv-O662-4012383","label":"O662-4012383 - Involuntary Service","type":"pv:Service","focus":false},{"id":"http://ld.company.org/prod-instances/srv-P516-8211068","label":"P516-8211068 - IoT Data Marketing","type":"pv:Service","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/dept-85880","to":"Marketing","label":"label"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-C831-2580759","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-D334-6681399","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-D844-3535311","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-G251-8414984","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-H402-6061531","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-L586-5133830","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-Q442-2123335","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-R771-3893828","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-Y299-9772513","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/srv-O662-4012383","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/srv-P516-8211068","label":"pv:responsibleFor"}]}},{"id":"ck25:5-en","question":"Who has expertise in Transistors?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  ?agent a pv:Agent ;\n           pv:areaOfExpertise prodi:prod-cat-Transistor .\n  BIND(?agent AS ?result)\n}","f1":0.0,"rows":["(no results)"],"repairs":2,"checks":[{"attempt":0,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":1,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":2,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/prod-cat-Transistor","label":"Transistor","type":"pv:ProductCategory","focus":true},{"id":"Transistor","label":"Transistor","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/prod-cat-Transistor","to":"Transistor","label":"label"},{"from":"http://ld.company.org/prod-instances/prod-cat-Transistor","to":"Transistor","label":"pv:name"}]}},{"id":"ck25:7-en","question":"Who is the manager of the Data Services department?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?employee pv:memberOf prodi:dept-41622 ;\n            pv:hasManager ?manager .\n} LIMIT 1","f1":0.0,"rows":[""],"repairs":1,"checks":[{"attempt":0,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":1,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/dept-41622","label":"Data Services","type":"pv:Department","focus":true},{"id":"Data Services","label":"Data Services","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Z272-2955088","label":"Z272-2955088 - Coil Sensor Resonator","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-A145-1240844","label":"A145-1240844 - Bipolar-junction Coil Compensator Transducer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-C697-6765940","label":"C697-6765940 - Network Driver","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-D228-6993564","label":"D228-6993564 - Log-periodic LCD Gauge Warp","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-D762-3837218","label":"D762-3837218 - Inductor Capacitor Switch","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-H609-2196524","label":"H609-2196524 - Planck Potentiometer Transformer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-M558-2275045","label":"M558-2275045 - Sensor Switch","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-O125-6715778","label":"O125-6715778 - Ceramic Network Driver","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Q986-9996088","label":"Q986-9996088 - Planck Transistor Transformer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-X375-4984404","label":"X375-4984404 - Multiplexer Transistor","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/srv-Y274-1029755","label":"Y274-1029755 - Industry-Grade Hacking","type":"pv:Service","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/dept-41622","to":"Data Services","label":"label"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-Z272-2955088","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-A145-1240844","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-C697-6765940","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-D228-6993564","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-D762-3837218","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-H609-2196524","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-M558-2275045","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-O125-6715778","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-Q986-9996088","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/hw-X375-4984404","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-41622","to":"http://ld.company.org/prod-instances/srv-Y274-1029755","label":"pv:responsibleFor"}]}},{"id":"ck25:8-en","question":"Which department is responsible for the Sensor Switch M558-2275045?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  prodi:hw-M558-2275045 pv:hasProductManager ?manager .\n  ?manager pv:memberOf ?department .\n  ?department a pv:Department ; pv:name ?result .\n}","f1":0.0,"rows":["Data Services"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/hw-M558-2275045","label":"M558-2275045 - Sensor Switch","type":"pv:Hardware","focus":true},{"id":"M558-2275045 - Sensor Switch","label":"M558-2275045 - Sensor Switch","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-A181-1118563","label":"A181-1118563 - Compensator Switch","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Sensor","label":"Sensor","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Switch","label":"Switch","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Anamchara.Foerstner%40company.org","label":"Anamchara Foerstner","type":"pv:Employee","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-e157b0e5-1085-4999-83a0-02a46d7a8994","label":"Garcia Ltd (Malaysia)","type":"pv:Supplier","focus":false},{"id":"http://ld.company.org/prod-instances/price-hw-M558-2275045-EUR","label":"3,41 EUR","type":"pv:Price","focus":false},{"id":"16","label":"16","type":"value","focus":false},{"id":"40","label":"40","type":"value","focus":false},{"id":"M558-2275045","label":"M558-2275045","type":"value","focus":false},{"id":"Sensor Switch","label":"Sensor Switch","type":"value","focus":false},{"id":"5","label":"5","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"M558-2275045 - Sensor Switch","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"http://ld.company.org/prod-instances/hw-A181-1118563","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"http://ld.company.org/prod-instances/prod-cat-Sensor","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"http://ld.company.org/prod-instances/prod-cat-Switch","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"http://ld.company.org/prod-instances/empl-Anamchara.Foerstner%40company.org","label":"pv:hasProductManager"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"http://ld.company.org/prod-instances/suppl-e157b0e5-1085-4999-83a0-02a46d7a8994","label":"pv:hasSupplier"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"http://ld.company.org/prod-instances/price-hw-M558-2275045-EUR","label":"pv:price"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"16","label":"pv:depth_mm"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"40","label":"pv:height_mm"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"M558-2275045","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"Sensor Switch","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/hw-M558-2275045","to":"5","label":"pv:weight_g"}]}},{"id":"ck25:9-en","question":"How many Sensor Switches do we offer?","query":"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT (COUNT(DISTINCT ?sensorSwitch) AS ?result) WHERE {\n  ?sensorSwitch a pv:Hardware ;\n                rdfs:label \"Sensor Switches\" .\n}","f1":0.0,"rows":["0"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:10-en","question":"What is the name of the Network expert from the Marketing Department?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?employee a pv:Employee ;\n            pv:areaOfExpertise prodi:prod-cat-Network ;\n            pv:memberOf prodi:dept-85880 ;\n            pv:name ?result .\n}","f1":1.0,"rows":["Kevin Feigenbaum","Lambert Faust"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/dept-85880","label":"Marketing","type":"pv:Department","focus":true},{"id":"Marketing","label":"Marketing","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-C831-2580759","label":"C831-2580759 - Warp","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-D334-6681399","label":"D334-6681399 - Resistor Inductor Gauge","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-D844-3535311","label":"D844-3535311 - Resistor Gauge Encoder","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-G251-8414984","label":"G251-8414984 - Coil Rheostat","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-H402-6061531","label":"H402-6061531 - Switch","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-L586-5133830","label":"L586-5133830 - Multiplexer Dipole","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Q442-2123335","label":"Q442-2123335 - Aluminum Potentiometer Capacitor","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-R771-3893828","label":"R771-3893828 - Multiplexer LCD Transducer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Y299-9772513","label":"Y299-9772513 - Log-periodic Oscillator Transformer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/srv-O662-4012383","label":"O662-4012383 - Involuntary Service","type":"pv:Service","focus":false},{"id":"http://ld.company.org/prod-instances/srv-P516-8211068","label":"P516-8211068 - IoT Data Marketing","type":"pv:Service","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Network","label":"Network","type":"pv:ProductCategory","focus":true},{"id":"Network","label":"Network","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/dept-85880","to":"Marketing","label":"label"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-C831-2580759","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-D334-6681399","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-D844-3535311","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-G251-8414984","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-H402-6061531","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-L586-5133830","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-Q442-2123335","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-R771-3893828","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/hw-Y299-9772513","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/srv-O662-4012383","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-85880","to":"http://ld.company.org/prod-instances/srv-P516-8211068","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/prod-cat-Network","to":"Network","label":"label"},{"from":"http://ld.company.org/prod-instances/prod-cat-Network","to":"Network","label":"pv:name"}]}},{"id":"ck25:11-en","question":"Which departments have Transducer Experts?","query":"PREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?department WHERE {\n  VALUES ?product { \n    prodi:hw-T341-6404509\n    prodi:hw-E709-4829800\n    prodi:hw-M133-5945489\n  }\n  ?product pv:hasProductManager ?manager .\n  ?manager pv:memberOf ?department .\n}","f1":0.8,"rows":["Production","Marketing","Product Management"],"repairs":2,"checks":[{"attempt":0,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":1,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":2,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/hw-E709-4829800","label":"E709-4829800 - Transducer Warp","type":"pv:Hardware","focus":true},{"id":"E709-4829800 - Transducer Warp","label":"E709-4829800 - Transducer Warp","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Transducer","label":"Transducer","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Warp","label":"Warp","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Henny.Foth%40company.org","label":"Henny Foth","type":"pv:Employee","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-7f0c3d05-f16c-44c0-b9f4-5ff9d2892270","label":"Brown, Torres and Bautista (Bangladesh)","type":"pv:Supplier","focus":false},{"id":"http://ld.company.org/prod-instances/price-hw-E709-4829800-EUR","label":"4,51 EUR","type":"pv:Price","focus":false},{"id":"13","label":"13","type":"value","focus":false},{"id":"18","label":"18","type":"value","focus":false},{"id":"E709-4829800","label":"E709-4829800","type":"value","focus":false},{"id":"Transducer Warp","label":"Transducer Warp","type":"value","focus":false},{"id":"0.661","label":"0.661","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-M133-5945489","label":"M133-5945489 - Transducer Warp","type":"pv:Hardware","focus":true},{"id":"M133-5945489 - Transducer Warp","label":"M133-5945489 - Transducer Warp","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org","label":"Ratt Beyer","type":"pv:Employee","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-57f3326a-e53b-4cb6-9b32-658df4cc11a4","label":"Kerr LLC (Spain)","type":"pv:Supplier","focus":false},{"id":"http://ld.company.org/prod-instances/price-hw-M133-5945489-EUR","label":"3,08 EUR","type":"pv:Price","focus":false},{"id":"15","label":"15","type":"value","focus":false},{"id":"72","label":"72","type":"value","focus":false},{"id":"M133-5945489","label":"M133-5945489","type":"value","focus":false},{"id":"8","label":"8","type":"value","focus":false},{"id":"51","label":"51","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-T341-6404509","label":"T341-6404509 - LCD Transducer Meter","type":"pv:Hardware","focus":true},{"id":"T341-6404509 - LCD Transducer Meter","label":"T341-6404509 - LCD Transducer Meter","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-I590-4406621","label":"I590-4406621 - Heisenberg Coil Resistor Meter","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Meter","label":"Meter","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/dept-66469","label":"Production","type":"pv:Department","focus":true},{"id":"http://ld.company.org/prod-instances/dept-85880","label":"Marketing","type":"pv:Department","focus":true},{"id":"http://ld.company.org/prod-instances/dept-22183","label":"Product Management","type":"pv:Department","focus":true}],"edges":[{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"E709-4829800 - Transducer Warp","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"http://ld.company.org/prod-instances/prod-cat-Transducer","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"http://ld.company.org/prod-instances/prod-cat-Warp","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"http://ld.company.org/prod-instances/empl-Henny.Foth%40company.org","label":"pv:hasProductManager"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"http://ld.company.org/prod-instances/suppl-7f0c3d05-f16c-44c0-b9f4-5ff9d2892270","label":"pv:hasSupplier"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"http://ld.company.org/prod-instances/price-hw-E709-4829800-EUR","label":"pv:price"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"13","label":"pv:depth_mm"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"18","label":"pv:height_mm"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"E709-4829800","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"Transducer Warp","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"0.661","label":"pv:reliabilityIndex"},{"from":"http://ld.company.org/prod-instances/hw-E709-4829800","to":"18","label":"pv:weight_g"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"M133-5945489 - Transducer Warp","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"http://ld.company.org/prod-instances/prod-cat-Transducer","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"http://ld.company.org/prod-instances/prod-cat-Warp","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org","label":"pv:hasProductManager"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"http://ld.company.org/prod-instances/suppl-57f3326a-e53b-4cb6-9b32-658df4cc11a4","label":"pv:hasSupplier"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"http://ld.company.org/prod-instances/price-hw-M133-5945489-EUR","label":"pv:price"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"15","label":"pv:depth_mm"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"72","label":"pv:height_mm"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"M133-5945489","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"Transducer Warp","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"8","label":"pv:weight_g"},{"from":"http://ld.company.org/prod-instances/hw-M133-5945489","to":"51","label":"pv:width_mm"},{"from":"http://ld.company.org/prod-instances/hw-T341-6404509","to":"T341-6404509 - LCD Transducer Meter","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-T341-6404509","to":"http://ld.company.org/prod-instances/hw-I590-4406621","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-T341-6404509","to":"http://ld.company.org/prod-instances/prod-cat-Meter","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-T341-6404509","to":"http://ld.company.org/prod-instances/prod-cat-Transducer","label":"pv:hasCategory"}]}},{"id":"ck25:13-en","question":"How many suppliers do we have in France?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT (COUNT(DISTINCT ?supplier) AS ?result) WHERE {\n  VALUES ?franceSupplier { prodi:suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7 prodi:suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6 prodi:suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09 }\n  ?supplier a pv:Supplier ;\n              pv:country \"France\" .\n  FILTER(?supplier = ?franceSupplier)\n}","f1":0.0,"rows":["0"],"repairs":1,"checks":[{"attempt":0,"errors":["G5 entity: <http://ld.company.org/prod-instances/France> is not in the graph. Use only the IRIs given to you."]},{"attempt":1,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","label":"Hill-Jones (France)","type":"pv:Supplier","focus":true},{"id":"Hill-Jones (France)","label":"Hill-Jones (France)","type":"value","focus":false},{"id":"http://dbpedia.org/resource/France","label":"France","type":"","focus":false},{"id":"France","label":"France","type":"value","focus":false},{"id":"FR","label":"FR","type":"value","focus":false},{"id":"Choisy-le-Roi","label":"Choisy-le-Roi","type":"value","focus":false},{"id":"092bb1b2-b39f-4521-9c21-c853db9d9a09","label":"092bb1b2-b39f-4521-9c21-c853db9d9a09","type":"value","focus":false},{"id":"Hill-Jones","label":"Hill-Jones","type":"value","focus":false},{"id":"48.7630238","label":"48.7630238","type":"value","focus":false},{"id":"2.4093664","label":"2.4093664","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","label":"Harris-Cunningham (France)","type":"pv:Supplier","focus":true},{"id":"Harris-Cunningham (France)","label":"Harris-Cunningham (France)","type":"value","focus":false},{"id":"Toulouse","label":"Toulouse","type":"value","focus":false},{"id":"1ee8f22a-1460-4875-b1a8-89d7cb2607d6","label":"1ee8f22a-1460-4875-b1a8-89d7cb2607d6","type":"value","focus":false},{"id":"Harris-Cunningham","label":"Harris-Cunningham","type":"value","focus":false},{"id":"43.6044622","label":"43.6044622","type":"value","focus":false},{"id":"1.4442469","label":"1.4442469","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","label":"Fletcher, Pierce and Navarro (France)","type":"pv:Supplier","focus":true},{"id":"Fletcher, Pierce and Navarro (France)","label":"Fletcher, Pierce and Navarro (France)","type":"value","focus":false},{"id":"Saint-Michel-sur-Orge","label":"Saint-Michel-sur-Orge","type":"value","focus":false},{"id":"9e95d78d-7f95-4752-9e1f-d522e67e63d7","label":"9e95d78d-7f95-4752-9e1f-d522e67e63d7","type":"value","focus":false},{"id":"Fletcher, Pierce and Navarro","label":"Fletcher, Pierce and Navarro","type":"value","focus":false},{"id":"48.6302735","label":"48.6302735","type":"value","focus":false},{"id":"2.3027478","label":"2.3027478","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"Hill-Jones (France)","label":"label"},{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"http://dbpedia.org/resource/France","label":"pv:country"},{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"France","label":"pv:addressCountry"},{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"FR","label":"pv:addressCountryCode"},{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"Choisy-le-Roi","label":"pv:addressLocality"},{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"092bb1b2-b39f-4521-9c21-c853db9d9a09","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"Hill-Jones","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"48.7630238","label":"lat"},{"from":"http://ld.company.org/prod-instances/suppl-092bb1b2-b39f-4521-9c21-c853db9d9a09","to":"2.4093664","label":"long"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"Harris-Cunningham (France)","label":"label"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"http://dbpedia.org/resource/France","label":"pv:country"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"France","label":"pv:addressCountry"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"FR","label":"pv:addressCountryCode"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"Toulouse","label":"pv:addressLocality"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"1ee8f22a-1460-4875-b1a8-89d7cb2607d6","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"Harris-Cunningham","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"43.6044622","label":"lat"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"1.4442469","label":"long"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"Fletcher, Pierce and Navarro (France)","label":"label"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"http://dbpedia.org/resource/France","label":"pv:country"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"France","label":"pv:addressCountry"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"FR","label":"pv:addressCountryCode"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"Saint-Michel-sur-Orge","label":"pv:addressLocality"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"9e95d78d-7f95-4752-9e1f-d522e67e63d7","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"Fletcher, Pierce and Navarro","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"48.6302735","label":"lat"},{"from":"http://ld.company.org/prod-instances/suppl-9e95d78d-7f95-4752-9e1f-d522e67e63d7","to":"2.3027478","label":"long"}]}},{"id":"ck25:14-en","question":"Which supplier in France delivers Compensators?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  ?product a pv:Hardware ; pv:hasCategory <http://ld.company.org/prod-instances/prod-cat-Compensator> ; pv:hasSupplier ?supplier .\n  ?supplier pv:country \"France\" .\n  ?supplier pv:name ?result .\n}","f1":0.0,"rows":["(no results)"],"repairs":2,"checks":[{"attempt":0,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":1,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":2,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:16-en","question":"Do we have suppliers in Toulouse?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nASK {\n  ?supplier a pv:Supplier ;\n              pv:addressLocality \"Toulouse\" .\n}","f1":1.0,"rows":["True"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:17-en","question":"Which suppliers do we have in Toulouse?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  ?supplier a pv:Supplier ;\n              pv:addressLocality \"Toulouse\" .\n  BIND(?supplier AS ?result)\n}","f1":1.0,"rows":["Harris-Cunningham (France)"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","label":"Harris-Cunningham (France)","type":"pv:Supplier","focus":true},{"id":"Harris-Cunningham (France)","label":"Harris-Cunningham (France)","type":"value","focus":false},{"id":"http://dbpedia.org/resource/France","label":"France","type":"","focus":false},{"id":"France","label":"France","type":"value","focus":false},{"id":"FR","label":"FR","type":"value","focus":false},{"id":"Toulouse","label":"Toulouse","type":"value","focus":false},{"id":"1ee8f22a-1460-4875-b1a8-89d7cb2607d6","label":"1ee8f22a-1460-4875-b1a8-89d7cb2607d6","type":"value","focus":false},{"id":"Harris-Cunningham","label":"Harris-Cunningham","type":"value","focus":false},{"id":"43.6044622","label":"43.6044622","type":"value","focus":false},{"id":"1.4442469","label":"1.4442469","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"Harris-Cunningham (France)","label":"label"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"http://dbpedia.org/resource/France","label":"pv:country"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"France","label":"pv:addressCountry"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"FR","label":"pv:addressCountryCode"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"Toulouse","label":"pv:addressLocality"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"1ee8f22a-1460-4875-b1a8-89d7cb2607d6","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"Harris-Cunningham","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"43.6044622","label":"lat"},{"from":"http://ld.company.org/prod-instances/suppl-1ee8f22a-1460-4875-b1a8-89d7cb2607d6","to":"1.4442469","label":"long"}]}},{"id":"ck25:18-en","question":"What is the cheapest Oscillator we have?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?oscillator a pv:Hardware ;\n              pv:hasCategory prodi:prod-cat-Oscillator ;\n              pv:price ?price .\n  ?price pv:amount ?amount .\n} ORDER BY ?amount LIMIT 1","f1":0.0,"rows":[""],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/prod-cat-Oscillator","label":"Oscillator","type":"pv:ProductCategory","focus":true},{"id":"Oscillator","label":"Oscillator","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/prod-cat-Oscillator","to":"Oscillator","label":"label"},{"from":"http://ld.company.org/prod-instances/prod-cat-Oscillator","to":"Oscillator","label":"pv:name"}]}},{"id":"ck25:19-en","question":"What is the most expensive service we offer?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?service a pv:Service ;\n           pv:price ?price .\n  ?price pv:amount ?amount .\n} ORDER BY DESC(?amount) LIMIT 1","f1":0.0,"rows":[""],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:21-en","question":"What is the heaviest coil that does not exceed a base area of 15x15 milimeter?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?coil a pv:Hardware ;\n          pv:hasCategory prodi:prod-cat-Coil ;\n          pv:width_mm ?width ;\n          pv:depth_mm ?depth ;\n          pv:weight_g ?weight .\n  FILTER(?width * ?depth <= 15 * 15)\n} ORDER BY DESC(?weight) LIMIT 1","f1":0.0,"rows":[""],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/prod-cat-Coil","label":"Coil","type":"pv:ProductCategory","focus":true},{"id":"Coil","label":"Coil","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/prod-cat-Coil","to":"Coil","label":"label"},{"from":"http://ld.company.org/prod-instances/prod-cat-Coil","to":"Coil","label":"pv:name"}]}},{"id":"ck25:23-en","question":"What products can I get from US suppliers that are compatible with the U990 LCD Inductor?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  ?product pv:hasSupplier ?supplier .\n  ?supplier pv:country \"US\" .\n  ?product pv:compatibleProduct prodi:hw-U990-5234138 .\n}","f1":0.0,"rows":["(no results)"],"repairs":2,"checks":[{"attempt":0,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":1,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":2,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/hw-U990-5234138","label":"U990-5234138 - LCD Inductor","type":"pv:Hardware","focus":true},{"id":"U990-5234138 - LCD Inductor","label":"U990-5234138 - LCD Inductor","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-F675-6890144","label":"F675-6890144 - Resistor Inductor Strain","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-A360-3041803","label":"A360-3041803 - Inductor Transformer Warp","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-A509-5571891","label":"A509-5571891 - Multiplexer Inductor","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-I264-7314323","label":"I264-7314323 - Film Inductor Memristor","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-J178-7002767","label":"J178-7002767 - Flow LCD Transistor Transducer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-S113-2439377","label":"S113-2439377 - LCD Potentiometer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Inductor","label":"Inductor","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-LCD","label":"LCD","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Anamchara.Foerstner%40company.org","label":"Anamchara Foerstner","type":"pv:Employee","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-1b447fbd-a0fe-4385-8141-ab5aa43fbedb","label":"Jones Group (Egypt)","type":"pv:Supplier","focus":false},{"id":"http://ld.company.org/prod-instances/price-hw-U990-5234138-EUR","label":"1,52 EUR","type":"pv:Price","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"U990-5234138 - LCD Inductor","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/hw-F675-6890144","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/hw-A360-3041803","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/hw-A509-5571891","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/hw-I264-7314323","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/hw-J178-7002767","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/hw-S113-2439377","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/prod-cat-Inductor","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/prod-cat-LCD","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/empl-Anamchara.Foerstner%40company.org","label":"pv:hasProductManager"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/suppl-1b447fbd-a0fe-4385-8141-ab5aa43fbedb","label":"pv:hasSupplier"},{"from":"http://ld.company.org/prod-instances/hw-U990-5234138","to":"http://ld.company.org/prod-instances/price-hw-U990-5234138-EUR","label":"pv:price"}]}},{"id":"ck25:24-en","question":"What is the pontiometer with the smallest volume?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?poti a pv:Hardware ;\n          pv:hasCategory prodi:prod-cat-Potentiometer ;\n          pv:depth_mm ?depth ;\n          pv:height_mm ?height ;\n          pv:width_mm ?width .\n  BIND(?depth * ?height * ?width AS ?volume)\n} ORDER BY ASC(?volume) LIMIT 1","f1":0.0,"rows":[""],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/prod-cat-Potentiometer","label":"Potentiometer","type":"pv:ProductCategory","focus":true},{"id":"Potentiometer","label":"Potentiometer","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/prod-cat-Potentiometer","to":"Potentiometer","label":"label"},{"from":"http://ld.company.org/prod-instances/prod-cat-Potentiometer","to":"Potentiometer","label":"pv:name"}]}},{"id":"ck25:25-en","question":"Which coil has the highest density?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  ?coil a pv:Hardware ; pv:hasCategory prodi:prod-cat-Coil ; pv:weight_g ?weight ; pv:depth_mm ?depth ; pv:height_mm ?height ; pv:width_mm ?width .\n  BIND(?weight / (?depth * ?height * ?width) AS ?density)\n} ORDER BY DESC(?density) LIMIT 1","f1":0.0,"rows":[""],"repairs":1,"checks":[{"attempt":0,"errors":["G4 vocabulary: pv:volume_mm3 does not exist. Did you mean pv:depth_mm, pv:height_mm, pv:width_mm? The only properties that exist are: pv:addressCountry, pv:addressCountryCode, pv:addressLocality, pv:addressText, pv:amount, pv:areaOfExpertise, pv:compatibleProduct, pv:country, pv:currency, pv:depth_mm, pv:eligibleFor, pv:email, pv:hasBomPart, pv:hasCategory, pv:hasDirectReport, pv:hasManager, pv:hasPart, pv:hasProductManager, pv:hasSupplier, pv:height_mm, pv:id, pv:memberOf, pv:name, pv:phone, pv:quantity, pv:reliabilityIndex, pv:responsibleFor, pv:weight_g, pv:width_mm. If none fits, the relation may be modelled in the opposite direction."]},{"attempt":1,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/prod-cat-Coil","label":"Coil","type":"pv:ProductCategory","focus":true},{"id":"Coil","label":"Coil","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/prod-cat-Coil","to":"Coil","label":"label"},{"from":"http://ld.company.org/prod-instances/prod-cat-Coil","to":"Coil","label":"pv:name"}]}},{"id":"ck25:27-en","question":"Give me a phone directory of everyone on staff who does not manage anyone, I need name, email, and phone, sorted by name?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?email ?phone WHERE {\n  ?employee a pv:Employee .\n  FILTER NOT EXISTS { ?manager pv:hasDirectReport ?employee }\n  ?employee pv:name ?name ;\n            pv:email ?email ;\n            pv:phone ?phone .\n} ORDER BY ?name","f1":0.758,"rows":["Adolfina Hoch \u00b7 Adolfina.Hoch@company.org \u00b7 +49-109-5719002","Anamchara Foerstner \u00b7 Anamchara.Foerstner@company.org \u00b7 +49-360-5655698","Arendt Beitel \u00b7 Arendt.Beitel@company.org \u00b7 +49-8763-66514379","Arnelle Gerber \u00b7 Arnelle.Gerber@company.org \u00b7 (03586) 7240528","Baldwin Dirksen \u00b7 Baldwin.Dirksen@company.org \u00b7 +49-6200-33069465","Corinna Ludwig \u00b7 Corinna.Ludwig@company.org \u00b7 +49-1743-24836762","Dieterich Blau \u00b7 Dieterich.Blau@company.org \u00b7 +49-2961-28181571","Elisabeth Harman \u00b7 Elisabeth.Harman@company.org \u00b7 +49-4278-55203507"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:30-en","question":"Which department have more than 5 employees? I need their names and the number of employees.","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?result (COUNT(?employee) AS ?employees) WHERE {\n  ?department a pv:Department ;\n              pv:name ?result ;\n              pv:hasDirectReport ?employee .\n} GROUP BY ?result HAVING (?employees > 5)","f1":0.0,"rows":["(no results)"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:32-en","question":"For each supplier, what's the average price (in EUR) of what they sell, round reasonably?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?supplier (ROUND(AVG(?amount)) AS ?averagePrice) WHERE {\n  ?product pv:hasSupplier ?supplier .\n  ?product pv:price ?price .\n  ?price pv:currency \"EUR\" ;\n           pv:amount ?amount .\n} GROUP BY ?supplier","f1":0.003,"rows":["Drake Ltd (Honduras) \u00b7 4.0","Harris-Waller (Venezuela, Bolivarian Republic of) \u00b7 4.0","Anderson Ltd (United States) \u00b7 4.0","Buchanan Group (Korea, Republic of) \u00b7 3.0","Ford, Martinez and Gutierrez (India) \u00b7 2.0","Odom-Lawrence (India) \u00b7 3.0","Kerr LLC (Spain) \u00b7 3.0","Goodman-Chapman (United States) \u00b7 2.0"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","label":"Drake Ltd (Honduras)","type":"pv:Supplier","focus":true},{"id":"Drake Ltd (Honduras)","label":"Drake Ltd (Honduras)","type":"value","focus":false},{"id":"http://dbpedia.org/resource/Honduras","label":"Honduras","type":"","focus":false},{"id":"Honduras","label":"Honduras","type":"value","focus":false},{"id":"HN","label":"HN","type":"value","focus":false},{"id":"El Para\u00edso","label":"El Para\u00edso","type":"value","focus":false},{"id":"034022f5-5327-45c2-aaff-524b1be2fbd5","label":"034022f5-5327-45c2-aaff-524b1be2fbd5","type":"value","focus":false},{"id":"Drake Ltd","label":"Drake Ltd","type":"value","focus":false},{"id":"13.9619941","label":"13.9619941","type":"value","focus":false},{"id":"-86.56279208240295","label":"-86.56279208240295","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","label":"Harris-Waller (Venezuela, Bolivarian Republic of)","type":"pv:Supplier","focus":true},{"id":"Harris-Waller (Venezuela, Bolivarian Republic of)","label":"Harris-Waller (Venezuela, Bolivarian Rep","type":"value","focus":false},{"id":"http://dbpedia.org/resource/Venezuela","label":"Venezuela","type":"","focus":false},{"id":"Venezuela, Bolivarian Republic of","label":"Venezuela, Bolivarian Republic of","type":"value","focus":false},{"id":"VE","label":"VE","type":"value","focus":false},{"id":"Ciudad Bolivia","label":"Ciudad Bolivia","type":"value","focus":false},{"id":"9093f9c5-0f56-40d7-b129-c13135c46a14","label":"9093f9c5-0f56-40d7-b129-c13135c46a14","type":"value","focus":false},{"id":"Harris-Waller","label":"Harris-Waller","type":"value","focus":false},{"id":"18.9132132","label":"18.9132132","type":"value","focus":false},{"id":"-98.4149381","label":"-98.4149381","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","label":"Anderson Ltd (United States)","type":"pv:Supplier","focus":true},{"id":"Anderson Ltd (United States)","label":"Anderson Ltd (United States)","type":"value","focus":false},{"id":"http://dbpedia.org/resource/United_States","label":"United_States","type":"","focus":false},{"id":"United States","label":"United States","type":"value","focus":false},{"id":"US","label":"US","type":"value","focus":false},{"id":"Payson","label":"Payson","type":"value","focus":false},{"id":"816e4baa-8158-4e2a-8ff4-c9f969998389","label":"816e4baa-8158-4e2a-8ff4-c9f969998389","type":"value","focus":false},{"id":"Anderson Ltd","label":"Anderson Ltd","type":"value","focus":false},{"id":"39.8169907","label":"39.8169907","type":"value","focus":false},{"id":"-91.2423657","label":"-91.2423657","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-6746c17d-5e49-47bc-82a1-90ac0c7aa01c","label":"Buchanan Group (Korea, Republic of)","type":"pv:Supplier","focus":true},{"id":"Buchanan Group (Korea, Republic of)","label":"Buchanan Group (Korea, Republic of)","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-b5028bba-a927-45d7-9032-ee90825311c5","label":"Ford, Martinez and Gutierrez (India)","type":"pv:Supplier","focus":true},{"id":"http://ld.company.org/prod-instances/suppl-8f607810-ca93-4274-9c27-d0a8dcba7c4a","label":"Odom-Lawrence (India)","type":"pv:Supplier","focus":true}],"edges":[{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"Drake Ltd (Honduras)","label":"label"},{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"http://dbpedia.org/resource/Honduras","label":"pv:country"},{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"Honduras","label":"pv:addressCountry"},{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"HN","label":"pv:addressCountryCode"},{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"El Para\u00edso","label":"pv:addressLocality"},{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"034022f5-5327-45c2-aaff-524b1be2fbd5","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"Drake Ltd","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"13.9619941","label":"lat"},{"from":"http://ld.company.org/prod-instances/suppl-034022f5-5327-45c2-aaff-524b1be2fbd5","to":"-86.56279208240295","label":"long"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"Harris-Waller (Venezuela, Bolivarian Republic of)","label":"label"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"http://dbpedia.org/resource/Venezuela","label":"pv:country"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"Venezuela, Bolivarian Republic of","label":"pv:addressCountry"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"VE","label":"pv:addressCountryCode"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"Ciudad Bolivia","label":"pv:addressLocality"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"9093f9c5-0f56-40d7-b129-c13135c46a14","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"Harris-Waller","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"18.9132132","label":"lat"},{"from":"http://ld.company.org/prod-instances/suppl-9093f9c5-0f56-40d7-b129-c13135c46a14","to":"-98.4149381","label":"long"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"Anderson Ltd (United States)","label":"label"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"http://dbpedia.org/resource/United_States","label":"pv:country"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"United States","label":"pv:addressCountry"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"US","label":"pv:addressCountryCode"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"Payson","label":"pv:addressLocality"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"816e4baa-8158-4e2a-8ff4-c9f969998389","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"Anderson Ltd","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"39.8169907","label":"lat"},{"from":"http://ld.company.org/prod-instances/suppl-816e4baa-8158-4e2a-8ff4-c9f969998389","to":"-91.2423657","label":"long"},{"from":"http://ld.company.org/prod-instances/suppl-6746c17d-5e49-47bc-82a1-90ac0c7aa01c","to":"Buchanan Group (Korea, Republic of)","label":"label"}]}},{"id":"ck25:33-en","question":"Are there departments with no manager assigned?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nASK {\n  ?dept a pv:Department .\n  FILTER NOT EXISTS { ?dept pv:hasManager ?manager }\n}","f1":0.0,"rows":["True"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:34-en","question":"I need to update my supplier rolodex, give me every supplier's name and all address details.","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nSELECT ?supplierName ?addressCountry ?addressCountryCode ?addressLocality ?addressText WHERE {\n  ?supplier a pv:Supplier ;\n            pv:name ?supplierName .\n  OPTIONAL { ?supplier pv:addressCountry ?addressCountry . }\n  OPTIONAL { ?supplier pv:addressCountryCode ?addressCountryCode . }\n  OPTIONAL { ?supplier pv:addressLocality ?addressLocality . }\n  OPTIONAL { ?supplier pv:addressText ?addressText . }\n}","f1":1.0,"rows":["Davis-Wagner \u00b7 Spain \u00b7 ES \u00b7 Bormujos","Maxwell Inc \u00b7 India \u00b7 IN \u00b7 Naraini","White-Nash \u00b7 Pakistan \u00b7 PK \u00b7 Larkana","Smith-Cobb \u00b7 United States \u00b7 US \u00b7 Sikeston","Davis Ltd \u00b7 Belarus \u00b7 BY \u00b7 Pinsk","Swanson-Kennedy \u00b7 China \u00b7 CN \u00b7 Zhabei","Fernandez-Roberts \u00b7 United States \u00b7 US \u00b7 Harlingen","Jordan, James and Bradley \u00b7 France \u00b7 FR \u00b7 Saint-L\u00f4"],"repairs":1,"checks":[{"attempt":0,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":1,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:36-en","question":"Which area of expertise is most relevant among our products, what are the top three skills?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result (COUNT(?product) AS ?products) WHERE {\n  ?agent a pv:Employee ;\n           pv:areaOfExpertise ?result .\n  ?product a pv:Product ;\n             pv:hasCategory ?result .\n} GROUP BY ?result ORDER BY DESC(?products) LIMIT 3","f1":0.0,"rows":["(no results)"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:37-en","question":"For each Bill of Material, how many parts does it contain and what is the total material quantity \u2014 show me only those BOMs exceeding 600 total items and order them descending.","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?bom (COUNT(?part) AS ?numParts) (SUM(?quantity) AS ?totalQuantity)\nWHERE {\n  ?bom a pv:BillOfMaterial ;\n         pv:hasBomPart ?bomPart .\n  ?bomPart pv:hasPart ?part ;\n           pv:quantity ?quantity .\n}\nGROUP BY ?bom\nHAVING (?totalQuantity > 600)\nORDER BY DESC(?totalQuantity)","f1":0.0,"rows":["(no results)"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:39-en","question":"Which hardware items are wider than they are tall, and have a depth under 50 mm? List their dimensions.","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result ?width ?height ?depth WHERE {\n  ?result a pv:Hardware ;\n            pv:width_mm ?width ;\n            pv:height_mm ?height ;\n            pv:depth_mm ?depth .\n  FILTER(?width > ?height && ?depth < 50)\n}","f1":1.0,"rows":["N560-4369045 - Resistor Compensator \u00b7 57 \u00b7 21 \u00b7 11","S418-2584457 - Bipolar-junction Dipole \u00b7 47 \u00b7 17 \u00b7 13","W986-7950553 - Field-effect Memristor Resonator Compensator \u00b7 45 \u00b7 13 \u00b7 20","H173-1200706 - Memristor Rheostat Transformer \u00b7 27 \u00b7 14 \u00b7 18","H642-6966395 - Polymer Strain Rheostat \u00b7 69 \u00b7 37 \u00b7 15","J986-8306638 - Phase Multiplexer Crystal Transducer \u00b7 39 \u00b7 15 \u00b7 20","M436-2993715 - LCD Resonator Compensator \u00b7 41 \u00b7 26 \u00b7 17","Q594-6895704 - LCD Network \u00b7 76 \u00b7 42 \u00b7 17"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/hw-N560-4369045","label":"N560-4369045 - Resistor Compensator","type":"pv:Hardware","focus":true},{"id":"N560-4369045 - Resistor Compensator","label":"N560-4369045 - Resistor Compensator","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-I965-1821441","label":"I965-1821441 - Multiplexer Resistor","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Q951-7651773","label":"Q951-7651773 - Coil Compensator","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Compensator","label":"Compensator","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Resistor","label":"Resistor","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Herr.Burgh.Eichel%40company.org","label":"Herr Burgh Eichel","type":"pv:Employee","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-8943ee5e-5f73-4765-85cd-0c2c934f8877","label":"Smith-Cobb (United States)","type":"pv:Supplier","focus":false},{"id":"http://ld.company.org/prod-instances/price-hw-N560-4369045-EUR","label":"2,61 EUR","type":"pv:Price","focus":false},{"id":"11","label":"11","type":"value","focus":false},{"id":"21","label":"21","type":"value","focus":false},{"id":"N560-4369045","label":"N560-4369045","type":"value","focus":false},{"id":"Resistor Compensator","label":"Resistor Compensator","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-S418-2584457","label":"S418-2584457 - Bipolar-junction Dipole","type":"pv:Hardware","focus":true},{"id":"S418-2584457 - Bipolar-junction Dipole","label":"S418-2584457 - Bipolar-junction Dipole","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org","label":"Ratt Beyer","type":"pv:Employee","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-25e44a18-cb4f-48aa-bb6a-c05189268df6","label":"Coleman LLC (Brazil)","type":"pv:Supplier","focus":false},{"id":"http://ld.company.org/prod-instances/price-hw-S418-2584457-EUR","label":"4,32 EUR","type":"pv:Price","focus":false},{"id":"13","label":"13","type":"value","focus":false},{"id":"17","label":"17","type":"value","focus":false},{"id":"S418-2584457","label":"S418-2584457","type":"value","focus":false},{"id":"Bipolar-junction Dipole","label":"Bipolar-junction Dipole","type":"value","focus":false},{"id":"0.754","label":"0.754","type":"value","focus":false},{"id":"16","label":"16","type":"value","focus":false},{"id":"47","label":"47","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-W986-7950553","label":"W986-7950553 - Field-effect Memristor Resonator Compensator","type":"pv:Hardware","focus":true},{"id":"W986-7950553 - Field-effect Memristor Resonator Compensator","label":"W986-7950553 - Field-effect Memristor Re","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-H664-9736043","label":"H664-9736043 - Log-periodic Potentiometer Resonator","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-H747-8053953","label":"H747-8053953 - Resonator Meter","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Resonator","label":"Resonator","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/hw-H173-1200706","label":"H173-1200706 - Memristor Rheostat Transformer","type":"pv:Hardware","focus":true},{"id":"http://ld.company.org/prod-instances/hw-H642-6966395","label":"H642-6966395 - Polymer Strain Rheostat","type":"pv:Hardware","focus":true},{"id":"http://ld.company.org/prod-instances/hw-J986-8306638","label":"J986-8306638 - Phase Multiplexer Crystal Transducer","type":"pv:Hardware","focus":true}],"edges":[{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"N560-4369045 - Resistor Compensator","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"http://ld.company.org/prod-instances/hw-I965-1821441","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"http://ld.company.org/prod-instances/hw-Q951-7651773","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"http://ld.company.org/prod-instances/prod-cat-Compensator","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"http://ld.company.org/prod-instances/prod-cat-Resistor","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"http://ld.company.org/prod-instances/empl-Herr.Burgh.Eichel%40company.org","label":"pv:hasProductManager"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"http://ld.company.org/prod-instances/suppl-8943ee5e-5f73-4765-85cd-0c2c934f8877","label":"pv:hasSupplier"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"http://ld.company.org/prod-instances/price-hw-N560-4369045-EUR","label":"pv:price"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"11","label":"pv:depth_mm"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"21","label":"pv:height_mm"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"N560-4369045","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/hw-N560-4369045","to":"Resistor Compensator","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"S418-2584457 - Bipolar-junction Dipole","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org","label":"pv:hasProductManager"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"http://ld.company.org/prod-instances/suppl-25e44a18-cb4f-48aa-bb6a-c05189268df6","label":"pv:hasSupplier"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"http://ld.company.org/prod-instances/price-hw-S418-2584457-EUR","label":"pv:price"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"13","label":"pv:depth_mm"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"17","label":"pv:height_mm"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"S418-2584457","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"Bipolar-junction Dipole","label":"pv:name"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"0.754","label":"pv:reliabilityIndex"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"16","label":"pv:weight_g"},{"from":"http://ld.company.org/prod-instances/hw-S418-2584457","to":"47","label":"pv:width_mm"},{"from":"http://ld.company.org/prod-instances/hw-W986-7950553","to":"W986-7950553 - Field-effect Memristor Resonator Compensator","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-W986-7950553","to":"http://ld.company.org/prod-instances/hw-H664-9736043","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-W986-7950553","to":"http://ld.company.org/prod-instances/hw-H747-8053953","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-W986-7950553","to":"http://ld.company.org/prod-instances/prod-cat-Resonator","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-W986-7950553","to":"http://ld.company.org/prod-instances/prod-cat-Compensator","label":"pv:hasCategory"}]}},{"id":"ck25:40-en","question":"Which hardware items - list id and name - have no active product manager?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?id ?name WHERE {\n  ?hardware a pv:Hardware ;\n              pv:id ?id ;\n              pv:name ?name .\n  FILTER NOT EXISTS { [] pv:hasProductManager ?hardware }\n}","f1":0.097,"rows":["C247-3833661 \u00b7 Encoder Transformer","E355-4376121 \u00b7 Film Oscillator Dipole","G826-1197003 \u00b7 Heisenberg LCD Oscillator Breaker","N560-4369045 \u00b7 Resistor Compensator","P253-1288849 \u00b7 Dipole Compensator","R490-4226805 \u00b7 Coil Resonator LCD","R902-1645052 \u00b7 Film Network Gauge Compensator","S649-2935217 \u00b7 LCD Inductor Memristor"],"repairs":1,"checks":[{"attempt":0,"errors":["G7 plausibility: the query is valid but returns nothing. Check entity IRIs and direction of properties."]},{"attempt":1,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:41-en","question":"For each manager, what percentage of their entire team work in the same department as the manager?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?manager (COUNT(?sameDeptEmployee) AS ?sameDeptCount) (COUNT(?allReports) AS ?totalReports) \n       ((COUNT(?sameDeptEmployee) / COUNT(?allReports)) * 100 AS ?percentage)\nWHERE {\n  ?manager a pv:Manager ;\n             pv:hasDirectReport ?allReports .\n  OPTIONAL {\n    ?allReports pv:memberOf ?dept .\n    ?manager pv:memberOf ?dept .\n    FILTER(?allReports != ?manager)\n    BIND(?allReports AS ?sameDeptEmployee)\n  }\n}\nGROUP BY ?manager\nHAVING (COUNT(?allReports) > 0)","f1":0.0,"rows":["(no results)"],"repairs":1,"checks":[{"attempt":0,"errors":["G2 syntax: Expected SelectQuery, found 'BIND'  (at char 585), (line:16, col:3)"]},{"attempt":1,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:43-en","question":"Show me any cycles of product compatibility \u2014 i.e. product A says it's compatible with B, and B says it's compatible with A (mutual pairs).","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?productA ?productB WHERE {\n  ?productA pv:compatibleProduct ?productB .\n  ?productB pv:compatibleProduct ?productA .\n  FILTER(?productA != ?productB)\n}","f1":1.0,"rows":["Y728-2083256 - Gauge Crystal Encoder \u00b7 C247-3833661 - Encoder Transformer","R287-3749176 - Log-periodic Memristor Encoder \u00b7 C247-3833661 - Encoder Transformer","Y676-8284278 - Encoder Warp \u00b7 C247-3833661 - Encoder Transformer","V178-8820348 - LCD Inductor \u00b7 G826-1197003 - Heisenberg LCD Oscillator Breaker","I892-8435352 - Heisenberg LCD Driver \u00b7 G826-1197003 - Heisenberg LCD Oscillator Breaker","F388-7030185 - Oscillator Transistor Transducer \u00b7 G826-1197003 - Heisenberg LCD Oscillator Breaker","W726-4190110 - Ceramic Multiplexer Transistor LCD \u00b7 G826-1197003 - Heisenberg LCD Oscillator Breaker","I965-1821441 - Multiplexer Resistor \u00b7 N560-4369045 - Resistor Compensator"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/hw-Y728-2083256","label":"Y728-2083256 - Gauge Crystal Encoder","type":"pv:Hardware","focus":true},{"id":"Y728-2083256 - Gauge Crystal Encoder","label":"Y728-2083256 - Gauge Crystal Encoder","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-C247-3833661","label":"C247-3833661 - Encoder Transformer","type":"pv:Hardware","focus":true},{"id":"http://ld.company.org/prod-instances/hw-R287-3749176","label":"R287-3749176 - Log-periodic Memristor Encoder","type":"pv:Hardware","focus":true},{"id":"http://ld.company.org/prod-instances/hw-Y676-8284278","label":"Y676-8284278 - Encoder Warp","type":"pv:Hardware","focus":true},{"id":"http://ld.company.org/prod-instances/hw-P393-8310950","label":"P393-8310950 - Multiplexer Crystal Switch","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Gauge","label":"Gauge","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Encoder","label":"Encoder","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Crystal","label":"Crystal","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Ratt.Hartmann%40company.org","label":"Ratt Hartmann","type":"pv:Employee","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-3ad032a1-2e9f-4629-93c7-0ee0b5bb0e25","label":"Richardson Inc (Japan)","type":"pv:Supplier","focus":false},{"id":"http://ld.company.org/prod-instances/price-hw-Y728-2083256-EUR","label":"1,74 EUR","type":"pv:Price","focus":false},{"id":"13","label":"13","type":"value","focus":false},{"id":"C247-3833661 - Encoder Transformer","label":"C247-3833661 - Encoder Transformer","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/prod-cat-Transformer","label":"Transformer","type":"pv:ProductCategory","focus":false},{"id":"http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org","label":"Ratt Beyer","type":"pv:Employee","focus":false},{"id":"http://ld.company.org/prod-instances/suppl-816202d7-9e53-402c-94a2-fb21b0e37c0e","label":"White-Nash (Pakistan)","type":"pv:Supplier","focus":false},{"id":"http://ld.company.org/prod-instances/price-hw-C247-3833661-EUR","label":"3,44 EUR","type":"pv:Price","focus":false},{"id":"12","label":"12","type":"value","focus":false},{"id":"58","label":"58","type":"value","focus":false},{"id":"C247-3833661","label":"C247-3833661","type":"value","focus":false},{"id":"R287-3749176 - Log-periodic Memristor Encoder","label":"R287-3749176 - Log-periodic Memristor En","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"Y728-2083256 - Gauge Crystal Encoder","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/hw-C247-3833661","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/hw-R287-3749176","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/hw-Y676-8284278","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/hw-P393-8310950","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/prod-cat-Gauge","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/prod-cat-Encoder","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/prod-cat-Crystal","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/empl-Ratt.Hartmann%40company.org","label":"pv:hasProductManager"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/suppl-3ad032a1-2e9f-4629-93c7-0ee0b5bb0e25","label":"pv:hasSupplier"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"http://ld.company.org/prod-instances/price-hw-Y728-2083256-EUR","label":"pv:price"},{"from":"http://ld.company.org/prod-instances/hw-Y728-2083256","to":"13","label":"pv:depth_mm"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"C247-3833661 - Encoder Transformer","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"http://ld.company.org/prod-instances/hw-Y728-2083256","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"http://ld.company.org/prod-instances/hw-R287-3749176","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"http://ld.company.org/prod-instances/hw-Y676-8284278","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"http://ld.company.org/prod-instances/prod-cat-Encoder","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"http://ld.company.org/prod-instances/prod-cat-Transformer","label":"pv:hasCategory"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"http://ld.company.org/prod-instances/empl-Ratt.Beyer%40company.org","label":"pv:hasProductManager"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"http://ld.company.org/prod-instances/suppl-816202d7-9e53-402c-94a2-fb21b0e37c0e","label":"pv:hasSupplier"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"http://ld.company.org/prod-instances/price-hw-C247-3833661-EUR","label":"pv:price"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"12","label":"pv:depth_mm"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"58","label":"pv:height_mm"},{"from":"http://ld.company.org/prod-instances/hw-C247-3833661","to":"C247-3833661","label":"pv:id"},{"from":"http://ld.company.org/prod-instances/hw-R287-3749176","to":"R287-3749176 - Log-periodic Memristor Encoder","label":"label"},{"from":"http://ld.company.org/prod-instances/hw-R287-3749176","to":"http://ld.company.org/prod-instances/hw-C247-3833661","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-R287-3749176","to":"http://ld.company.org/prod-instances/hw-Y728-2083256","label":"pv:compatibleProduct"},{"from":"http://ld.company.org/prod-instances/hw-R287-3749176","to":"http://ld.company.org/prod-instances/hw-Y676-8284278","label":"pv:compatibleProduct"}]}},{"id":"ck25:44-en","question":"Which hardware items have dimensions in the top 10 % of all widths, and what are their IDs, names and widths?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result ?id ?name ?width WHERE {\n  ?hardware a pv:Hardware ;\n              pv:id ?id ;\n              pv:name ?name ;\n              pv:width_mm ?width .\n} ORDER BY DESC(?width) LIMIT 10","f1":0.197,"rows":["B523-5464510 \u00b7 Bipolar-junction Switch Transducer \u00b7 80","C409-9349178 \u00b7 Multiplexer Rheostat Encoder \u00b7 80","F797-8658626 \u00b7 Multiplexer Gauge Crystal \u00b7 80","M205-1376206 \u00b7 Dipole Memristor Encoder \u00b7 80","M350-8985312 \u00b7 Oscillator Memristor Transistor \u00b7 80","N206-9059859 \u00b7 Polymer Memristor Capacitor \u00b7 80","P337-4636612 \u00b7 Sensor Driver Crystal \u00b7 80","U967-6553099 \u00b7 Bipolar-junction Gauge Warp \u00b7 80"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[],"edges":[]}},{"id":"ck25:45-en","question":"Which supplier delivers the most reliable Inductor?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?result WHERE {\n  {\n    SELECT (MAX(?reliability) AS ?maxReliability)\n    WHERE {\n      ?inductor a pv:Hardware ; \n                pv:hasCategory prodi:prod-cat-Inductor ;\n                pv:reliabilityIndex ?reliability .\n    }\n  }\n  ?inductor a pv:Hardware ; \n            pv:hasCategory prodi:prod-cat-Inductor ;\n            pv:reliabilityIndex ?reliability ;\n            pv:hasSupplier ?supplier .\n  FILTER(?reliability = ?maxReliability)\n  ?supplier pv:name ?result .\n} LIMIT 1","f1":0.0,"rows":["Adkins, Lopez and Boyd"],"repairs":1,"checks":[{"attempt":0,"errors":["G2 syntax: Expected SelectQuery, found 'FILTER'  (at char 402), (line:11, col:3)"]},{"attempt":1,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/prod-cat-Inductor","label":"Inductor","type":"pv:ProductCategory","focus":true},{"id":"Inductor","label":"Inductor","type":"value","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/prod-cat-Inductor","to":"Inductor","label":"label"},{"from":"http://ld.company.org/prod-instances/prod-cat-Inductor","to":"Inductor","label":"pv:name"}]}},{"id":"ck25:47-en","question":"From which countries are the BOM parts of our SkySync MechWave delivered?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT DISTINCT ?result WHERE {\n  prodi:bom-17 pv:hasBomPart ?bomPart .\n  ?bomPart pv:hasPart ?product .\n  ?product pv:hasSupplier ?supplier .\n  ?supplier pv:country ?result .\n}","f1":1.0,"rows":["http://dbpedia.org/resource/Belarus","http://dbpedia.org/resource/Germany","http://dbpedia.org/resource/Vietnam","http://dbpedia.org/resource/Tanzania","http://dbpedia.org/resource/Finland","http://dbpedia.org/resource/Slovakia","http://dbpedia.org/resource/Kingdom_of_the_Netherlands"],"repairs":0,"checks":[{"attempt":0,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/bom-17","label":"SkySync MechWave","type":"pv:BillOfMaterial","focus":true},{"id":"SkySync MechWave","label":"SkySync MechWave","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/bom-part-17-A243-3332548","label":"A243-3332548 (75)","type":"pv:BomPart","focus":false},{"id":"http://ld.company.org/prod-instances/bom-part-17-H958-9648652","label":"H958-9648652 (16)","type":"pv:BomPart","focus":false},{"id":"http://ld.company.org/prod-instances/bom-part-17-M812-1436368","label":"M812-1436368 (40)","type":"pv:BomPart","focus":false},{"id":"http://ld.company.org/prod-instances/bom-part-17-N573-1498086","label":"N573-1498086 (72)","type":"pv:BomPart","focus":false},{"id":"http://ld.company.org/prod-instances/bom-part-17-Q696-9337626","label":"Q696-9337626 (43)","type":"pv:BomPart","focus":false},{"id":"http://ld.company.org/prod-instances/bom-part-17-R599-8820686","label":"R599-8820686 (36)","type":"pv:BomPart","focus":false},{"id":"http://ld.company.org/prod-instances/bom-part-17-X480-1491345","label":"X480-1491345 (21)","type":"pv:BomPart","focus":false},{"id":"http://ld.company.org/prod-instances/bom-part-17-X634-4382180","label":"X634-4382180 (67)","type":"pv:BomPart","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/bom-17","to":"SkySync MechWave","label":"label"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"http://ld.company.org/prod-instances/bom-part-17-A243-3332548","label":"pv:hasBomPart"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"http://ld.company.org/prod-instances/bom-part-17-H958-9648652","label":"pv:hasBomPart"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"http://ld.company.org/prod-instances/bom-part-17-M812-1436368","label":"pv:hasBomPart"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"http://ld.company.org/prod-instances/bom-part-17-N573-1498086","label":"pv:hasBomPart"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"http://ld.company.org/prod-instances/bom-part-17-Q696-9337626","label":"pv:hasBomPart"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"http://ld.company.org/prod-instances/bom-part-17-R599-8820686","label":"pv:hasBomPart"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"http://ld.company.org/prod-instances/bom-part-17-X480-1491345","label":"pv:hasBomPart"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"http://ld.company.org/prod-instances/bom-part-17-X634-4382180","label":"pv:hasBomPart"},{"from":"http://ld.company.org/prod-instances/bom-17","to":"SkySync MechWave","label":"pv:name"}]}},{"id":"ck25:50-en","question":"Which department is resposible for the most product and how many product are this?","query":"PREFIX pv: <http://ld.company.org/prod-vocab/>\nPREFIX prodi: <http://ld.company.org/prod-instances/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?department (COUNT(?product) AS ?products) WHERE {\n  ?department a pv:Department ;\n              pv:responsibleFor ?product .\n} GROUP BY ?department ORDER BY DESC(?products) LIMIT 1","f1":1.0,"rows":["Product Management \u00b7 12"],"repairs":1,"checks":[{"attempt":0,"errors":["G6 execution: Parse error: Non-group key variable in SELECT: ?result"]},{"attempt":1,"errors":[]}],"graph":{"nodes":[{"id":"http://ld.company.org/prod-instances/dept-22183","label":"Product Management","type":"pv:Department","focus":true},{"id":"Product Management","label":"Product Management","type":"value","focus":false},{"id":"http://ld.company.org/prod-instances/hw-L128-5499058","label":"L128-5499058 - Field-effect Multiplexer Potentiometer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-L536-5185541","label":"L536-5185541 - Coil Gauge","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-A688-6056899","label":"A688-6056899 - Multiplexer Inductor","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-G144-5498082","label":"G144-5498082 - Multiplexer Transistor Transformer","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-H274-5987347","label":"H274-5987347 - Driver Resonator","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-I980-1040313","label":"I980-1040313 - Film Resonator Capacitor Strain","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-L316-4863597","label":"L316-4863597 - Potentiometer Inductor","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-O857-5463957","label":"O857-5463957 - Transistor Compensator","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-Q774-7287508","label":"Q774-7287508 - Flow Potentiometer Crystal Rheostat","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-T291-4144066","label":"T291-4144066 - LCD Gauge Warp","type":"pv:Hardware","focus":false},{"id":"http://ld.company.org/prod-instances/hw-U836-7709298","label":"U836-7709298 - Driver Switch Transducer","type":"pv:Hardware","focus":false}],"edges":[{"from":"http://ld.company.org/prod-instances/dept-22183","to":"Product Management","label":"label"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-L128-5499058","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-L536-5185541","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-A688-6056899","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-G144-5498082","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-H274-5987347","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-I980-1040313","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-L316-4863597","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-O857-5463957","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-Q774-7287508","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-T291-4144066","label":"pv:responsibleFor"},{"from":"http://ld.company.org/prod-instances/dept-22183","to":"http://ld.company.org/prod-instances/hw-U836-7709298","label":"pv:responsibleFor"}]}}],"scores":[{"id":"A0","title":"The model on its own","blurb":"No help at all: just the question.","f1":0.029,"exact":1,"partial":0,"total":35},{"id":"A1","title":"Told what exists","blurb":"Given the list of things and relationships in the graph.","f1":0.199,"exact":6,"partial":3,"total":35},{"id":"A2","title":"Given the real IDs","blurb":"Names in the question are looked up and resolved to real IDs.","f1":0.304,"exact":9,"partial":4,"total":35},{"id":"A3","title":"Checked before answering","blurb":"Eight checks on the query, with up to two retries.","f1":0.386,"exact":11,"partial":6,"total":35}],"scores_small":[{"id":"A0","title":"The model on its own","blurb":"No help at all: just the question.","f1":0.029,"exact":1,"partial":0,"total":35},{"id":"A1","title":"Told what exists","blurb":"Given the list of things and relationships in the graph.","f1":0.084,"exact":2,"partial":2,"total":35},{"id":"A2","title":"Given the real IDs","blurb":"Names in the question are looked up and resolved to real IDs.","f1":0.17,"exact":5,"partial":2,"total":35},{"id":"A3","title":"Checked before answering","blurb":"Eight checks on the query, with up to two retries.","f1":0.17,"exact":5,"partial":2,"total":35}]}</script>
+<script>
+const DATA = JSON.parse(document.getElementById("demo-data").textContent);
+const $ = (id) => document.getElementById(id);
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ================= interactive graph ================= */
+function graphView(container, graph, opts = {}) {
+  container.innerHTML = "";
+  if (!graph.nodes.length) {
+    container.innerHTML = `<p style="color:#7b9298;font-size:13px;padding:26px;text-align:center">
+      This question isn't about one particular thing, so there's no small picture to draw.</p>`;
+    return;
+  }
+  const W = container.clientWidth || 640, H = container.clientHeight || 340;
+  const nodes = graph.nodes.map((n, i) => ({
+    ...n,
+    x: W / 2 + Math.cos(i * 2.399) * (n.focus ? 40 : 150),
+    y: H / 2 + Math.sin(i * 2.399) * (n.focus ? 40 : 120),
+    vx: 0, vy: 0,
+  }));
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const links = graph.edges.map((e) => ({ s: byId.get(e.from), t: byId.get(e.to), label: e.label }))
+                          .filter((l) => l.s && l.t);
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("height", H);
+  svg.innerHTML = `<defs>
+      <marker id="tip-${opts.key || "g"}" viewBox="0 0 8 8" refX="15" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="#2d474c"></path></marker>
+      <pattern id="grid-${opts.key || "g"}" width="26" height="26" patternUnits="userSpaceOnUse">
+        <path d="M26 0 L0 0 0 26" fill="none" stroke="var(--board-line)" stroke-width="1" opacity=".55"></path>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid-${opts.key || "g"})"></rect>
+    <g class="viewport"><g class="edges"></g><g class="nodes"></g></g>`;
+  container.appendChild(svg);
+
+  const tip = document.createElement("div");
+  tip.className = "tip";
+  container.appendChild(tip);
+
+  const viewport = svg.querySelector(".viewport");
+  const edgeLayer = svg.querySelector(".edges");
+  const nodeLayer = svg.querySelector(".nodes");
+  const NS = "http://www.w3.org/2000/svg";
+
+  const edgeEls = links.map((l) => {
+    const line = document.createElementNS(NS, "line");
+    line.setAttribute("stroke", "#2d474c");
+    line.setAttribute("stroke-width", "1.5");
+    line.setAttribute("marker-end", `url(#tip-${opts.key || "g"})`);
+    const text = document.createElementNS(NS, "text");
+    text.setAttribute("class", "edge-label");
+    text.setAttribute("text-anchor", "middle");
+    text.textContent = links.length > 18 ? "" : l.label;
+    edgeLayer.append(line, text);
+    return { l, line, text };
+  });
+
+  const nodeEls = nodes.map((n) => {
+    const g = document.createElementNS(NS, "g");
+    g.style.cursor = "grab";
+    const isValue = n.type === "value";
+    const r = n.focus ? 10 : isValue ? 5 : 7;
+    const circle = document.createElementNS(NS, "circle");
+    circle.setAttribute("r", r);
+    circle.setAttribute("fill", n.focus ? "#c9762f" : isValue ? "#4a6166" : "#2f9e85");
+    circle.setAttribute("stroke", "#08100f");
+    circle.setAttribute("stroke-width", "2");
+    if (n.focus) {
+      const halo = document.createElementNS(NS, "circle");
+      halo.setAttribute("r", r + 6);
+      halo.setAttribute("fill", "none");
+      halo.setAttribute("stroke", "#c9762f");
+      halo.setAttribute("stroke-opacity", ".3");
+      g.appendChild(halo);
+    }
+    const text = document.createElementNS(NS, "text");
+    text.setAttribute("class", "node-label");
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("y", -(r + 8));
+    text.textContent = n.label.length > 24 ? n.label.slice(0, 23) + "\u2026" : n.label;
+    g.append(circle, text);
+    nodeLayer.appendChild(g);
+
+    g.addEventListener("pointerenter", () => {
+      tip.innerHTML = `<span class="t">${esc(n.type || (n.type === "value" ? "value" : "thing"))}</span>${esc(n.label)}`;
+      tip.style.opacity = "1";
+    });
+    g.addEventListener("pointermove", (event) => {
+      const box = container.getBoundingClientRect();
+      tip.style.left = Math.min(event.clientX - box.left + 12, box.width - 270) + "px";
+      tip.style.top = event.clientY - box.top + 12 + "px";
+    });
+    g.addEventListener("pointerleave", () => { tip.style.opacity = "0"; });
+    g.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+      n.pinned = true;
+      g.setPointerCapture(event.pointerId);
+      const move = (e) => {
+        const box = svg.getBoundingClientRect();
+        const scale = (W / box.width) / view.k;
+        n.x = (e.clientX - box.left) * (W / box.width) / view.k - view.x / view.k;
+        n.y = (e.clientY - box.top) * (H / box.height) / view.k - view.y / view.k;
+        n.vx = n.vy = 0;
+        heat = Math.max(heat, 0.35);
+        void scale;
+      };
+      const up = () => { g.releasePointerCapture(event.pointerId); svg.removeEventListener("pointermove", move); };
+      svg.addEventListener("pointermove", move);
+      g.addEventListener("pointerup", up, { once: true });
+    });
+    return { n, g, circle };
+  });
+
+  /* pan and zoom */
+  const view = { x: 0, y: 0, k: 1 };
+  const applyView = () => viewport.setAttribute("transform", `translate(${view.x} ${view.y}) scale(${view.k})`);
+  svg.addEventListener("pointerdown", (event) => {
+    svg.classList.add("dragging");
+    const start = { x: event.clientX, y: event.clientY, vx: view.x, vy: view.y };
+    const box = svg.getBoundingClientRect();
+    const move = (e) => {
+      view.x = start.vx + (e.clientX - start.x) * (W / box.width);
+      view.y = start.vy + (e.clientY - start.y) * (H / box.height);
+      applyView();
+    };
+    const up = () => { svg.classList.remove("dragging"); window.removeEventListener("pointermove", move); };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up, { once: true });
+  });
+  svg.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    const box = svg.getBoundingClientRect();
+    const mx = (event.clientX - box.left) * (W / box.width), my = (event.clientY - box.top) * (H / box.height);
+    const factor = event.deltaY < 0 ? 1.12 : 1 / 1.12;
+    const k = Math.max(0.35, Math.min(3.2, view.k * factor));
+    view.x = mx - (mx - view.x) * (k / view.k);
+    view.y = my - (my - view.y) * (k / view.k);
+    view.k = k;
+    applyView();
+  }, { passive: false });
+
+  const zoomers = document.createElement("div");
+  zoomers.className = "zoomers";
+  zoomers.innerHTML = `<button title="Zoom in">+</button><button title="Zoom out">&minus;</button><button title="Reset">&#8635;</button>`;
+  const [zin, zout, zreset] = zoomers.querySelectorAll("button");
+  const zoomBy = (factor) => {
+    const k = Math.max(0.35, Math.min(3.2, view.k * factor));
+    view.x = W / 2 - (W / 2 - view.x) * (k / view.k);
+    view.y = H / 2 - (H / 2 - view.y) * (k / view.k);
+    view.k = k; applyView();
+  };
+  zin.onclick = () => zoomBy(1.25);
+  zout.onclick = () => zoomBy(1 / 1.25);
+  zreset.onclick = () => { view.x = view.y = 0; view.k = 1; applyView(); heat = 0.5; if (REDUCED) settle(); };
+  container.appendChild(zoomers);
+
+  const hint = document.createElement("div");
+  hint.className = "hint";
+  hint.textContent = "drag to move \u00b7 scroll to zoom \u00b7 drag a dot to pull it";
+  container.appendChild(hint);
+
+  /* force layout */
+  let heat = 1;
+  function tick() {
+    for (const l of links) {
+      const dx = l.t.x - l.s.x, dy = l.t.y - l.s.y;
+      const d = Math.hypot(dx, dy) || 1, f = (d - 150) * 0.02 * heat;
+      const ux = dx / d * f, uy = dy / d * f;
+      if (!l.s.pinned) { l.s.vx += ux; l.s.vy += uy; }
+      if (!l.t.pinned) { l.t.vx -= ux; l.t.vy -= uy; }
+    }
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const d2 = dx * dx + dy * dy || 1;
+        if (d2 < 42000) {
+          const f = (3400 / d2) * heat;
+          const ux = dx / Math.sqrt(d2) * f, uy = dy / Math.sqrt(d2) * f;
+          if (!a.pinned) { a.vx -= ux; a.vy -= uy; }
+          if (!b.pinned) { b.vx += ux; b.vy += uy; }
+        }
+      }
+    }
+    for (const n of nodes) {
+      if (!n.pinned) {
+        n.vx += (W / 2 - n.x) * 0.0016 * heat;
+        n.vy += (H / 2 - n.y) * 0.0022 * heat;
+        n.x += (n.vx *= 0.82);
+        n.y += (n.vy *= 0.82);
+      }
+      n.x = Math.max(46, Math.min(W - 46, n.x));
+      n.y = Math.max(26, Math.min(H - 22, n.y));
+    }
+    heat = Math.max(0.02, heat * 0.985);
+  }
+  function draw() {
+    for (const { l, line, text } of edgeEls) {
+      line.setAttribute("x1", l.s.x); line.setAttribute("y1", l.s.y);
+      line.setAttribute("x2", l.t.x); line.setAttribute("y2", l.t.y);
+      text.setAttribute("x", (l.s.x + l.t.x) / 2);
+      text.setAttribute("y", (l.s.y + l.t.y) / 2 - 5);
+    }
+    for (const { n, g } of nodeEls) g.setAttribute("transform", `translate(${n.x} ${n.y})`);
+  }
+  function settle() { for (let i = 0; i < 400; i++) tick(); draw(); }
+
+  if (REDUCED) { settle(); }
+  else {
+    let raf;
+    const loop = () => { tick(); draw(); raf = requestAnimationFrame(loop); };
+    loop();
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !raf) loop();
+      else if (!entry.isIntersecting && raf) { cancelAnimationFrame(raf); raf = 0; }
+    }).observe(container);
+  }
+}
+
+/* ================= step 1: the worked example ================= */
+const full = DATA.questions[0].graph;
+const hub = (full.nodes.find((n) => n.focus) || full.nodes[0]).id;
+const NAMING = new Set(["label", "name", "id", "pv:name", "pv:id"]);
+const introEdges = full.edges.filter((e) => e.from === hub && !NAMING.has(e.label)).slice(0, 6);
+const keep = new Set([hub, ...introEdges.map((e) => e.to)]);
+const intro = { nodes: full.nodes.filter((n) => keep.has(n.id)), edges: introEdges };
+$("fact-list").innerHTML = intro.edges.slice(0, 6).map((e) => {
+  const from = intro.nodes.find((n) => n.id === e.from), to = intro.nodes.find((n) => n.id === e.to);
+  return `<div class="fact">
+    <span class="subj">${esc((from && from.label) || "?")}</span>
+    <span class="rel">${esc(e.label)}</span>
+    <span>${esc(((to && to.label) || "?").slice(0, 28))}</span>
+  </div>`;
+}).join("");
+graphView($("stage-intro"), intro, { key: "intro" });
+
+/* ================= step 4: scoreboard ================= */
+let series = "big";
+const allScores = { big: DATA.scores, small: DATA.scores_small || DATA.scores };
+const maxExact = Math.max(...Object.values(allScores).flat().map((s) => s.exact)) || 1;
+const drawBars = () => { $("bars").innerHTML = allScores[series].map((s) => `
+  <div class="bar-row">
+    <div class="bar-label"><b>${esc(s.title)}</b><span>${esc(s.blurb)}</span></div>
+    <div class="track">
+      <div class="fill${s.exact === maxExact ? " peak" : ""}" data-w="${(s.exact / maxExact) * 100}"></div>
+      <div class="value">${s.exact} of ${s.total} fully right<span class="f1">F1 ${s.f1.toFixed(3)}</span></div>
+    </div>
+  </div>`).join(""); };
+drawBars();
+for (const button of [$("m-32"), $("m-7")]) {
+  button.addEventListener("click", () => {
+    series = button.dataset.m;
+    $("m-32").setAttribute("aria-pressed", String(series === "big"));
+    $("m-7").setAttribute("aria-pressed", String(series === "small"));
+    $("bars-title").textContent = series === "big"
+      ? "Large model \u00b7 32 billion parameters" : "Small model \u00b7 7 billion parameters";
+    drawBars();
+    animateBars();
+  });
+}
+const animateBars = () => { for (const fill of document.querySelectorAll(".fill")) fill.style.width = fill.dataset.w + "%"; };
+new IntersectionObserver((entries, observer) => {
+  if (entries[0].isIntersecting) { animateBars(); observer.disconnect(); }
+}, { threshold: .3 }).observe($("bars"));
+
+/* ================= step 5: explorer ================= */
+const grade = (f1) => f1 > 0.99 ? "right" : f1 > 0 ? "partial" : "wrong";
+let filter = "all";
+
+function renderList() {
+  const shown = DATA.questions.filter((q) => filter === "all" || grade(q.f1) === filter);
+  $("qlist").innerHTML = shown.length ? shown.map((q) => `
+    <button class="qitem" data-id="${q.id}" aria-current="${q.id === current}">
+      <span class="dot ${grade(q.f1)}"></span><span>${esc(q.question)}</span>
+    </button>`).join("") : `<p class="note" style="padding:16px">None in this group.</p>`;
+}
+let current = DATA.questions[0].id;
+
+$("filters").addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
+  filter = button.dataset.f;
+  for (const other of $("filters").children) other.setAttribute("aria-pressed", String(other === button));
+  renderList();
+});
+$("qlist").addEventListener("click", (event) => {
+  const button = event.target.closest(".qitem");
+  if (!button) return;
+  current = button.dataset.id;
+  renderList();
+  show(DATA.questions.find((q) => q.id === current));
+});
+
+function highlight(query) {
+  return esc(query)
+    .replace(/\b(PREFIX|SELECT|DISTINCT|WHERE|FILTER|OPTIONAL|GROUP BY|ORDER BY|LIMIT|OFFSET|ASK|BIND|HAVING|COUNT|SUM|AVG|MIN|MAX|NOT EXISTS|AS|DESC|ASC)\b/g, '<span class="kw">$1</span>')
+    .replace(/&lt;(http[^&]*)&gt;/g, '<span class="iri">&lt;$1&gt;</span>')
+    .replace(/(\?\w+)/g, '<span class="var">$1</span>');
+}
+
+function show(q) {
+  const g = grade(q.f1);
+  const verdict = g === "right" ? "Matched the correct answer exactly"
+    : g === "partial" ? `Partly right &mdash; F1 ${q.f1.toFixed(2)}` : "Wrong answer";
+  const last = q.checks.length ? q.checks[q.checks.length - 1].errors : [];
+  $("detail").innerHTML = `
+    <div class="card"><div class="card-body">
+      <h3 style="margin-bottom:10px">${esc(q.question)}</h3>
+      <span class="verdict ${g}"><span class="dot ${g}"></span>${verdict}</span>
+      <span class="note" style="margin-left:10px">${q.repairs} repair${q.repairs === 1 ? "" : "s"} &middot; ${esc(q.id)}</span>
+    </div></div>
+    <div class="card">
+      <div class="card-head"><h4>The query it wrote</h4></div>
+      <pre class="sparql">${highlight(q.query || "(nothing usable)")}</pre>
+    </div>
+    <div class="card">
+      <div class="card-head"><h4>What the checks said</h4></div>
+      <div class="card-body checks">
+        ${(q.checks.length ? q.checks : [{ attempt: 0, errors: [] }]).map((c) => `
+          <div class="check">
+            <span class="badge ${c.errors.length ? "fail" : "pass"}">${c.errors.length ? "stopped" : "passed"}</span>
+            <span>${c.attempt === 0 ? "First attempt" : "After repair " + c.attempt}: ${
+              c.errors.length ? esc(c.errors.join(" \u00b7 ")) : "read-only, valid, every name exists, runs"}</span>
+          </div>`).join("")}
+        ${last.length ? '<p class="note">Returned anyway as the best it had &mdash; but the system knew it was imperfect.</p>' : ""}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h4>What came back</h4></div>
+      <div class="card-body"><ul class="answers">${q.rows.map((r) => `<li>${esc(r)}</li>`).join("")}</ul></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h4>The facts involved</h4><span style="font-size:var(--s--1);color:var(--ink-3)">drag &middot; zoom</span></div>
+      <div class="legend">
+        <span><i style="background:#c9762f"></i>named in the query</span>
+        <span><i style="background:#2f9e85"></i>connected thing</span>
+        <span><i style="background:#4a6166"></i>plain value</span>
+      </div>
+      <div class="stage" id="stage-q" style="height:380px;margin-top:12px"></div>
+    </div>`;
+  graphView($("stage-q"), q.graph, { key: "q" });
+}
+
+renderList();
+show(DATA.questions[0]);
+
+/* ================= step 6: schema ================= */
+$("classes").innerHTML = DATA.schema.classes.map((c) => `
+  <div class="cls">
+    <h4>${esc(c.id.replace("pv:", ""))}</h4>
+    <div class="count">${c.instances ? c.instances.toLocaleString() + " of them" : "a general category"}</div>
+    ${c.comment ? `<p>${esc(c.comment)}</p>` : ""}
+  </div>`).join("");
+$("props").innerHTML = `<thead><tr><th>Relationship</th><th>From</th><th></th><th>To</th></tr></thead><tbody>
+  ${DATA.schema.properties.map((p) => `<tr><td>${esc(p.id.replace("pv:", ""))}</td>
+     <td>${esc(p.from.replace("pv:", ""))}</td><td style="color:var(--ink-3)">&rarr;</td>
+     <td>${esc(p.to.replace("pv:", ""))}</td></tr>`).join("")}</tbody>`;
+
+/* ================= step 7: ask ================= */
+$("ask-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const question = $("ask-input").value.trim();
+  if (!question) return;
+  $("ask-out").textContent = "Asking the system on this machine\u2026";
+  try {
+    const response = await fetch("http://localhost:8000/?dataset=" +
+      encodeURIComponent("https://text2sparql.aksw.org/2025/corporate/") +
+      "&question=" + encodeURIComponent(question));
+    const body = await response.json();
+    $("ask-out").innerHTML = `<pre class="sparql" style="border-radius:9px;margin-top:12px">${highlight(body.query || "(no query)")}</pre>`;
+  } catch {
+    $("ask-out").textContent = "Nothing answered on port 8000. Start it with `make serve` and a model running, then try again.";
+  }
+});
+</script>

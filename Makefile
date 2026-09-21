@@ -1,4 +1,4 @@
-.PHONY: data store load truth truth-official serve rehearse smoke evaluate evaluate-test report demo test
+.PHONY: data store load truth truth-official serve rehearse smoke evaluate evaluate-test report demo-data demo test
 
 data:          ## download CK25 at the pinned commit
 	scripts/get_data.sh
@@ -35,8 +35,10 @@ report:        ## rebuild results/RESULTS.md and diagnostics from whatever has b
 	uv run --group eval python eval/diagnostics.py
 	uv run --group eval python eval/report.py
 
-demo:          ## rebuild the self-contained demo page from the saved results
+demo-data:     ## re-extract the demo's data from the results (needs the store running)
 	PYTHONPATH=src uv run --group eval python eval/build_demo.py
+
+demo:          ## rebuild docs/index.html from the extracted data (no store needed)
 	PYTHONPATH=src uv run python eval/inline_demo.py
 
 test:
